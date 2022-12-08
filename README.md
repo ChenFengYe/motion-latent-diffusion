@@ -1,11 +1,11 @@
 # MLD: Motion Latent Diffusion Models
 
 ### [Executing your Commands via Motion Diffusion in Latent Space](xxx)
-### [Project Page](https://chenxin.tech/TightCap.html) | [Arxiv](xx)
+### [Project Page](https://chenxin.tech/mld) | [Arxiv](xx)
 Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** diffusion model. Our work ahieves **state-of-the-art** motion quality and two orders of magnitude **faster** than previous diffusion models on raw motion data.
 
 ## 🚩 News
-1/12/22 - Upload paper and init project，code will be released in two weeks
+8/12/22 - Upload paper and init project，code will be released in two weeks
 
 ## ⚡ Quick Start
 
