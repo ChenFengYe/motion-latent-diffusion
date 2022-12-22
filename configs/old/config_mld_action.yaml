@@ -1,0 +1,109 @@
+NAME: 'Action_1105_VaeMcrossLatent5NoKL_dec8_bs64_clipHidden_uncond25_01' # Experiment name
+DEBUG: True # Debug mode
+SEED_VALUE: 1234 # Seed value
+ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
+DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]
+
+# Training configuration
+TRAIN:
+  #---------------------------------
+  STAGE: diffusion # stage 1 or 2, "vae" or "diffusion", "vae_diffusion"
+  #---------------------------------
+  ABLATION:
+    VAE_TYPE: actor
+    LATENT_SIZE: 1
+    IS_DIST: False
+    NOSTD: False # ablation study for cycle loss
+    CYCLE: False # ablation study for cycle loss
+  DATASETS: ['Humanact12'] # Training datasets
+  NUM_WORKERS: 11 # Number of workers
+  BATCH_SIZE: 200 # Size of batches
+  START_EPOCH: 0 # Start epochMMOTIONENCODER
+  END_EPOCH: 9999999 # End epoch
+  RESUME: None # Resume training from this path
+  # PRETRAINED_VAE:
+
+  PRETRAINED: ''
+  OPTIM:
+    TYPE: AdamW # Optimizer type
+    LR: 1e-4 # Learning rate
+
+# Evaluating Configuration
+EVAL:
+  DATASETS: ['Humanact12'] # Evaluating datasets
+  BATCH_SIZE: 64 # Evaluating Batch size
+  SPLIT: test
+
+# Test Configuration
+TEST:
+  CHECKPOINTS: /apdcephfs/share_1227775/mingzhenzhu/jiangbiao/TMOST/experiments/mdiffuse/MDiffuse_1014_VaeActor_humanML3D_transdec/checkpoints/latest-epoch=549.ckpt # Pretrained model path
+  DATASETS: ['Humanact12'] # training datasets
+  SPLIT: test
+  BATCH_SIZE: 64 # training Batch size
+  MEAN: False
+  NUM_SAMPLES: 1
+  FACT: 1
+
+  MM_NUM_TIMES: 20
+  DIVERSITY_TIMES: 200
+
+# Datasets Configuration
+DATASET:
+  JOINT_TYPE: 'Humanact12' # join type
+  SAMPLER:
+    MAX_LEN: -1
+    MIN_LEN: -1
+
+METRIC:
+  TYPE: ['HUMANACTMetrics']
+  # TYPE: ['TM2TMetrics']
+  # TYPE: ['TemosMetric']
+  # TYPE: ['TemosMetric', 'TM2TMetrics']
+# Losses Configuration
+LOSS:
+  TYPE: mdiffuse # Losses type
+  LAMBDA_LATENT: 1.0e-5 # Lambda for latent Losses
+  LAMBDA_KL: 1.0e-5 # Lambda for kl Losses
+  LAMBDA_REC: 1.0 # Lambda for reconstruction Losses
+  LAMBDA_CROSS: 1.0 # Lambda for reconstruction Losses
+  LAMBDA_CYCLE: 0.0 # Lambda for cycle Losses
+  DIST_SYNC_ON_STEP: False # Sync Losses on step when distributed trained
+
+# Model Configuration
+MODEL:
+  VAE: True # Whether vae model
+  CONDITION: action
+  MODEL_TYPE: mdiffuse # Model Type
+  LATENT_DIM: [1, 256] # Latent dimension
+  FF_SIZE: 1024 #
+  NUM_LAYERS: 8 # Number of layers
+  NUM_HEAD: 4 # Number of head layers
+  DROUPOUT: 0.1 # Dropout rate
+  ACTIVATION: gelu # Activation type
+  GUIDANCE_SCALE: 2.5
+  GUIDANCE_UNCONDP: 0.1
+
+  DENOISER:
+    # TYPE: trans_enc
+    TYPE: trans_dec
+  TRANS_DEC:
+    NUM_DECODER: 1
+  SCHEDULER:
+    TYPE: ddim
+  TEXT_ENCODER:
+    TYPE: clip
+    LAST_HIDDEN_STATE: True # for clip
+  # motion decoder
+  MOTION_DECODER:
+    TYPE: tmost
+
+# Logger configuration
+LOGGER:
+  SACE_CHECKPOINT_EPOCH: 200
+  LOG_EVERY_STEPS: 1
+  VAL_EVERY_STEPS: 1
+  TENSORBOARD: True
+  WANDB:
+    PROJECT: mdiffuse
+    OFFLINE: True
+    RESUME_ID: None

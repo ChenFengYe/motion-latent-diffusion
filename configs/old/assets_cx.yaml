@@ -1,0 +1,43 @@
+FOLDER: './../TMOSTData/exps' # Experiment files saving path
+
+TRAIN:
+  BATCH_SIZE: 5
+
+TEST:
+  FOLDER: './../TMOSTData/results' # Testing files saving path
+
+DATASET:
+  SMPL_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/smpl'
+  TRANSFORM_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/transforms/'
+  WORD_VERTILIZER_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/glove/'
+  KIT:
+    ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/kit-ml' # KIT directory
+    SPLIT_ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/kit-ml' # KIT splits directory
+  HumanML3D:
+    ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/humanml3d' # HumanML3D directory
+    SPLIT_ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/humanml3d' # HumanML3D splits directory
+  HUMANML3D:
+    ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/humanml3d' # HumanML3D directory
+    SPLIT_ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/humanml3d' # HumanML3D splits directory
+  HUMANACT12:
+    ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/HumanAct12Poses'
+    SPLIT_ROOT: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/datasets/HumanAct12Poses'
+
+MODEL:
+  BERT_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/distilbert-base-uncased' # bert model path for all text encoders
+  CLIP_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/clip-vit-large-patch14' # bert model path for all text encoders
+  T2M_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/t2m/'
+
+  HUMANACT12_REC_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/actionrecognition'
+  UESTC_REC_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/actionrecognition'
+  # Set model path separately for different encoders
+  # TEXT_ENCODER:
+  #   MODELPATH: './deps/distilbert-base-uncased' # bert model path for text encoder
+  # TEXT_STYLE_ENCODER:
+  #   MODELPATH: './deps/distilbert-base-uncased' # bert model path for text style encoder
+  # TEXT_CONTENT_ENCODER:
+  #   MODELPATH: './deps/distilbert-base-uncased' # bert model path for text content encoder
+
+RENDER:
+  BLENDER_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/libs/blender-2.93.2-linux-x64/blender'
+  FACES_PATH: '/apdcephfs/share_1227775/mingzhenzhu/jiangbiao/deps/smplh/smplh.faces'

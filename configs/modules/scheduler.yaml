@@ -1,0 +1,27 @@
+scheduler:
+  target: diffusers.DDIMScheduler
+  num_inference_timesteps: 50
+  eta: 0.0
+  params:
+    num_train_timesteps: 1000
+    beta_start: 0.00085
+    beta_end: 0.012
+    beta_schedule: 'scaled_linear' # Optional: ['linear', 'scaled_linear', 'squaredcos_cap_v2']
+    # variance_type: 'fixed_small'
+    clip_sample: false # clip sample to -1~1
+    # below are for ddim
+    set_alpha_to_one: false
+    steps_offset: 1
+
+noise_scheduler:
+  target: diffusers.DDPMScheduler
+  params:
+    num_train_timesteps: 1000
+    beta_start: 0.00085
+    beta_end: 0.012
+    beta_schedule: 'scaled_linear' # Optional: ['linear', 'scaled_linear', 'squaredcos_cap_v2']
+    variance_type: 'fixed_small'
+    clip_sample: false # clip sample to -1~1
+    # below are for ddim
+    # set_alpha_to_one: false
+    # steps_offset: 1

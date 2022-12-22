@@ -1,0 +1,21 @@
+NAME: 'Tmost_base_0917_fixValTrain_newadain_noinit_useCycLoss' # Experiment name
+ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
+DEVICE: [7] # Index of gpus eg. [0] or [0,1,2,3]
+
+RENDER:
+  FOLDER: '/remote-home/jiangbiao/TMOST/animations'
+  JOINT_TYPE: 'HumanML3D'
+  INPUT_MODE: 'npy'
+  DIR: ''
+  NPY: '/home/HumanML3D/new_joints/012314.npy'
+  DENOISING: True
+  OLDRENDER: True
+  RES: 'high'
+  DOWNSAMPLE: False
+  FPS: 20.0
+  CANONICALIZE: True
+  EXACT_FRAME: 0.5
+  NUM: 8
+  MODE: 'video'
+  VID_EXT: 'mp4'
+  FACES_PATH: '/remote-home/jiangbiao/TMOST/deps/smplh/smplh.faces'

@@ -1,0 +1,125 @@
+# FOLDER: ./experiments
+SEED_VALUE: 1234
+TRAIN:
+  SPLIT: 'train'
+  NUM_WORKERS: 2 # Number of workers
+  BATCH_SIZE: 4 # Size of batches
+  START_EPOCH: 0 # Start epoch
+  END_EPOCH: 2000 # End epoch
+  RESUME: '' # Experiment path to be resumed training
+  PRETRAINED: '' # Pretrained model path
+
+  OPTIM:
+    OPTIM.TYPE: 'AdamW' # Optimizer type
+    OPTIM.LR: 1e-4 # Learning rate
+
+  ABLATION:
+    VAE_TYPE: 'actor' # vae ablation: actor or mcross
+    VAE_ARCH: 'encoder_decoder' # mdiffusion vae architecture
+    PE_TYPE: 'actor' # mdiffusion mld or actor
+    DIFF_PE_TYPE: 'actor' # mdiffusion mld or actor
+    SKIP_CONNECT: False # skip connection for denoiser va
+    # use linear to expand mean and std rather expand token nums
+    MLP_DIST: False
+    IS_DIST: False # Mcross distribution kl
+    PREDICT_EPSILON: True # noise or motion
+
+EVAL:
+  SPLIT: 'gtest'
+  BATCH_SIZE: 1 # Evaluating Batch size
+  NUM_WORKERS: 12 # Evaluating Batch size
+
+TEST:
+  TEST_DIR: ''
+  CHECKPOINTS: '' # Pretrained model path
+  SPLIT: 'gtest'
+  BATCH_SIZE: 1 # Testing Batch size
+  NUM_WORKERS: 12 # Evaluating Batch size
+  SAVE_PREDICTIONS: False # Weather to save predictions
+  COUNT_TIME: False # Weather to count time during test
+  REPLICATION_TIMES: 20 # Number of times to replicate the test
+  MM_NUM_SAMPLES: 100 # Number of samples for multimodal test
+  MM_NUM_REPEATS: 30 # Number of repeats for multimodal test
+  MM_NUM_TIMES: 10 # Number of times to repeat the multimodal test
+  DIVERSITY_TIMES: 300 # Number of times to repeat the diversity test
+model:
+  t2m_textencoder:
+    dim_word: 300
+    dim_pos_ohot: 15
+    dim_text_hidden: 512
+    dim_coemb_hidden: 512
+
+  t2m_motionencoder:
+    dim_move_hidden: 512
+    dim_move_latent: 512
+    dim_motion_hidden: 1024
+    dim_motion_latent: 512
+LOSS:
+  LAMBDA_LATENT: 1e-5 # Lambda for latent losses
+  LAMBDA_KL: 1e-5 # Lambda for kl losses
+  LAMBDA_REC: 1.0 # Lambda for reconstruction losses
+  LAMBDA_JOINT: 1.0 # Lambda for joint losses
+  LAMBDA_GEN: 1.0 # Lambda for text-motion generation losses
+  LAMBDA_CROSS: 1.0 # Lambda for cross-reconstruction losses
+  LAMBDA_CYCLE: 1.0 # Lambda for cycle losses
+  LAMBDA_PRIOR: 0.0
+  DIST_SYNC_ON_STEP: True
+METRIC:
+  FORCE_IN_METER: True
+  DIST_SYNC_ON_STEP: True
+DATASET:
+  NCLASSES: 10
+  SAMPLER:
+    MAX_SQE: -1
+    MAX_LEN: 196
+    MIN_LEN: 40
+    MAX_TEXT_LEN: 20
+  KIT:
+    PICK_ONE_TEXT: true
+    FRAME_RATE: 12.5
+    UNIT_LEN: 4
+  HUMANML3D:
+    PICK_ONE_TEXT: true
+    FRAME_RATE: 20.0
+    UNIT_LEN: 4
+  HUMANACT12:
+    NUM_FRAMES: 60
+    POSE_REP: rot6d
+    GLOB: true
+    TRANSLATION: true
+  UESTC:
+    NUM_FRAMES: 60
+    POSE_REP: rot6d
+    GLOB: true
+    TRANSLATION: true
+LOGGER:
+  SACE_CHECKPOINT_EPOCH: 1
+  LOG_EVERY_STEPS: 1
+  VAL_EVERY_STEPS: 10
+  TENSORBOARD: true
+  WANDB:
+    OFFLINE: false
+    PROJECT: null
+    RESUME_ID: null
+RENDER:
+  JOINT_TYPE: mmm
+  INPUT_MODE: npy
+  DIR: ''
+  NPY: ''
+  DENOISING: true
+  OLDRENDER: true
+  RES: high
+  DOWNSAMPLE: true
+  FPS: 12.5
+  CANONICALIZE: true
+  EXACT_FRAME: 0.5
+  NUM: 7
+  MODE: sequence
+  VID_EXT: mp4
+  ALWAYS_ON_FLOOR: false
+  GT: false
+DEMO:
+  MOTION_TRANSFER: false
+  RENDER: false
+  FRAME_RATE: 12.5
+  EXAMPLE: null

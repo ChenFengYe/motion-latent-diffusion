@@ -1,0 +1,98 @@
+# NAME: 'Tmost_base_0920_noCycLoss_test' # Experiment name
+NAME: '' # Experiment name
+DEBUG: False # Debug mode
+SEED_VALUE: 1234 # Seed value
+ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
+DEVICE: [0, 1, 2, 3] # Index of gpus eg. [0] or [0,1,2,3]
+
+# Training configuration
+TRAIN:
+  ABLATION:
+    NOSTD: False # ablation study for cycle loss
+    CYCLE: False # ablation study for cycle loss
+  DATASETS: ['kit'] # Training datasets
+  NUM_WORKERS: 12 # Number of workers
+  BATCH_SIZE: 24 # Size of batches
+  START_EPOCH: 0 # Start epochMMOTIONENCODER
+  END_EPOCH: 200000 # End epoch
+  RESUME: None # Resume training from this path
+  PRETRAINED: '' # Pretrained model path
+  OPTIM:
+    TYPE: 'AdamW' # Optimizer type
+    LR: 1e-4 # Learning rate
+
+# Evaluating Configuration
+EVAL:
+  DATASETS: ['kit'] # Evaluating datasets
+  BATCH_SIZE: 10 # Evaluating Batch size
+
+# Test Configuration
+TEST:
+  CHECKPOINTS: '' # Pretrained model path
+  DATASETS: ['kit'] # training datasets
+  BATCH_SIZE: 1 # training Batch size
+  MEAN: False
+  NUM_SAMPLES: 1
+  FACT: 1
+
+# Datasets Configuration
+DATASET:
+  JOINT_TYPE: 'mmm' # join type
+  KIT:
+    FRAME_RATE: 12.5 # Frame rate for rendering
+    PICK_ONE_TEXT: True # Pick one text when training
+METRIC:
+  # TYPE: ['TemosMetric','TM2TMetrics']
+  TYPE: ['TemosMetric']
+# Losses Configuration
+LOSS:
+  TYPE: 'tmost' # Losses type
+  LAMBDA_LATENT: 1.0e-5 # Lambda for latent Losses
+  LAMBDA_KL: 1.0e-5 # Lambda for kl Losses
+  LAMBDA_REC: 1.0 # Lambda for reconstruction Losses
+  LAMBDA_CROSS: 1.0 # Lambda for reconstruction Losses
+  LAMBDA_CYCLE: 0.0 # Lambda for cycle Losses
+  DIST_SYNC_ON_STEP: False # Sync Losses on step when distributed trained
+
+# Model Configuration
+MODEL:
+  VAE: True # Whether vae model
+  MODEL_TYPE: 'tmost' # Model Type
+
+  LATENT_DIM: 256 # Latent dimension
+  FF_SIZE: 1024 #
+  NUM_LAYERS: 6 # Number of layers
+  NUM_HEAD: 6 # Number of head layers
+  DROUPOUT: 0.1 # Dropout rate
+  ACTIVATION: 'gelu' # Activation type
+
+  # Multiplie encoder network
+  # text style encoder
+  TEXT_STYLE_ENCODER:
+    TYPE: 'tmost_bert'
+    FINETUNE: False
+  # text content encoder
+  TEXT_CONTENT_ENCODER:
+    TYPE: 'tmost_bert'
+    FINETUNE: False
+  # motion style encoder
+  MOTION_STYLE_ENCODER:
+    VAE: False
+    TYPE: 'tmost'
+  # motion content encoder
+  MOTION_CONTENT_ENCODER:
+    VAE: True
+    TYPE: 'tmost'
+  # motion decoder
+  MOTION_DECODER:
+    TYPE: 'tmost'
+
+# Logger configuration
+LOGGER:
+  SACE_CHECKPOINT_EPOCH: 200
+  LOG_EVERY_STEPS: 1
+  TENSORBOARD: True
+  WANDB:
+    PROJECT: 'tmost'
+    OFFLINE: False
+    RESUME_ID: 'p17lmuhx'
