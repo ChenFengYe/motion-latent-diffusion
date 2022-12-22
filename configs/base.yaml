@@ -7,6 +7,7 @@ TRAIN:
   START_EPOCH: 0 # Start epoch
   END_EPOCH: 2000 # End epoch
   RESUME: '' # Experiment path to be resumed training
+  PRETRAINED_VAE: ''
   PRETRAINED: '' # Pretrained model path
 
   OPTIM:
@@ -42,6 +43,7 @@ TEST:
   MM_NUM_REPEATS: 30 # Number of repeats for multimodal test
   MM_NUM_TIMES: 10 # Number of times to repeat the multimodal test
   DIVERSITY_TIMES: 300 # Number of times to repeat the diversity test
+  REP_I: 0
 model:
   t2m_textencoder:
     dim_word: 300
