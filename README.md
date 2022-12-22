@@ -17,6 +17,9 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 
 ## ⚡ Quick Start
 
+<details>
+  <summary><b>Setup envs</b></summary>
+
 ### 1. Conda environment
 ```
 conda create python=3.9 --name mld
@@ -42,6 +45,7 @@ xxx
 
 ### 4. (Optional) Download manually
 Visit [the Google Driver](xxx) to download the previous dependencies and model.
+</details> 
 
 
 ## ▶️ Demo
@@ -77,6 +81,13 @@ The outputs:
 ### 1. Prepare the datasets
 
 ### 2. Ready to train
+Please first check the parameters in ``configs/config_mld_humanml3d.yaml``, e.g. ``NAME``,``DEBUG``. 
+
+Then, run the following command:
+```
+python -m train --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/assets.yaml --batch_size 64
+```
+
 
 ### 3. Evaluate the model
 </details>

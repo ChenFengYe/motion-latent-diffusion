@@ -86,7 +86,7 @@ LOSS:
   DIST_SYNC_ON_STEP: False # Sync Losses on step when distributed trained
 
 # Model Configuration
-MODEL:
+model:
   VAE: True # Whether vae model
   MODEL_TYPE: mdiffuse # Model Type
   LATENT_DIM: [1,256] # Latent dimension

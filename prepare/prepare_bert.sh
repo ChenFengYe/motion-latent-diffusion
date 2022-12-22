@@ -1,4 +1,3 @@
-mkdir deps
 cd deps/
 # yum -y install git-lfs
 git lfs install
