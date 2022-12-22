@@ -41,9 +41,10 @@ Run the script to download dependencies materials:
 
 ```
 bash prepare/download_smpl_model.sh
+bash prepare/prepare_clip.sh
 ```
 
-For Text-to-Motion Evaluation
+For Text to Motion Evaluation
 
 ```
 bash prepare/download_t2m_evaluators.sh
