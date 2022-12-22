@@ -109,6 +109,14 @@ python -m train --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/ass
 
 ### 3. Evaluate the model
 
+Please first put the tained model checkpoint path to `TEST.CHECKPOINT` in `configs/config_mld_humanml3d.yaml`.
+
+Then, run the following command:
+
+```
+python -m test --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/assets.yaml
+```
+
 </details>
 
 ## 👀 Visualization

@@ -18,7 +18,7 @@ TRAIN:
   START_EPOCH: 0 # Start epochMMOTIONENCODER
   END_EPOCH: 2000 # End epoch
   RESUME: '' # Resume training from this path
-  PRETRAINED_VAE: mld_humanml3d.ckpt # vae model path
+  PRETRAINED_VAE: '' # vae model path
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate
@@ -31,7 +31,7 @@ EVAL:
 
 # Test Configuration
 TEST:
-  CHECKPOINTS: mld_humanml3d.ckpt # Pretrained model path
+  CHECKPOINTS: ./models/mld_humanml3d_checkpoint/1222_mld_humanml3d_FID041.ckpt # Pretrained model path
   DATASETS: ['humanml3d'] # training datasets
   SPLIT: test
   BATCH_SIZE: 32 # training Batch size
