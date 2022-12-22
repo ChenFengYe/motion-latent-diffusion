@@ -1,7 +1,7 @@
 # MLD: Motion Latent Diffusion Models
+
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/executing-your-commands-via-motion-diffusion/motion-synthesis-on-humanml3d)](https://paperswithcode.com/sota/motion-synthesis-on-humanml3d?p=executing-your-commands-via-motion-diffusion)
 ![Pytorch_lighting](https://img.shields.io/badge/Pytorch_lighting->=1.7-Blue?logo=Pytorch) ![Diffusers](https://img.shields.io/badge/Diffusers->=0.7.2-Red?logo=diffusers)
-
 
 ### [Executing your Commands via Motion Diffusion in Latent Space](https://chenxin.tech/mld)
 
@@ -21,34 +21,49 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
   <summary><b>Setup envs</b></summary>
 
 ### 1. Conda environment
+
 ```
 conda create python=3.9 --name mld
 conda activate mld
 ```
-Install the packages in ``requirements.txt`` and install [PyTorch 1.12.1](https://pytorch.org/)
+
+Install the packages in `requirements.txt` and install [PyTorch 1.12.1](https://pytorch.org/)
+
 ```
 pip install -r requirements.txt
 ```
+
 We test our code on Python 3.9.12 and PyTorch 1.12.1.
 
 ### 2. Dependencies
+
 Run the script to download dependencies materials:
+
 ```
-xxx
+bash prepare/download_smpl_model.sh
+```
+
+For Text-to-Motion Evaluation
+
+```
+bash prepare/download_t2m_evaluators.sh
 ```
 
 ### 3. Pre-train model
+
 Run the script to download the pre-train model
+
 ```
 xxx
 ```
 
 ### 4. (Optional) Download manually
 Visit [the Google Driver](xxx) to download the previous dependencies and model.
-</details> 
+</details>
 
 
 ## ▶️ Demo
+
 <details>
   <summary><b>Text-to-motion</b></summary>
 
@@ -73,8 +88,8 @@ The outputs:
 - `text file`: the input text prompt
 </details>
 
-
 ## 💻 Train your own models
+
 <details>
   <summary><b>WIP</b></summary>
 
@@ -90,14 +105,16 @@ python -m train --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/ass
 
 
 ### 3. Evaluate the model
+
 </details>
 
-
 ## 👀 Visualization
+
 <details>
   <summary><b>Details for Rendering</b></summary>
 
 ### 1. Setup blender - WIP
+
 Refer to [TEMOS-Rendering motions](https://github.com/Mathux/TEMOS) for blender setup, then install the following dependencies.
 
 ```
@@ -105,7 +122,9 @@ YOUR_BLENDER_PATH/blender --background --python -m pip install -r prepare/requir
 ```
 
 ### 2. (Optional) Render rigged cylinders
+
 Run the following command using blender:
+
 ```
 YOUR_BLENDER_PATH/blender --background --python render.py -- --cfg=./configs/render.yaml --dir=YOUR_NPY_FOLDER --mode=video --joint_type=HumanML3D
 ```
@@ -124,6 +143,7 @@ This outputs:
 ### 3. Render SMPL meshes
 
 Run the following command to render SMPL using blender:
+
 ```
 YOUR_BLENDER_PATH/blender --background --python render.py -- --cfg=./configs/render.yaml --dir=YOUR_NPY_FOLDER --mode=video --joint_type=HumanML3D
 ```
