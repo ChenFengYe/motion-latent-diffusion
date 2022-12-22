@@ -74,7 +74,7 @@ Please check the `configs/asset.yaml` for path config, TEST.FOLDER as output fol
 Then, run the following script:
 
 ```
-python demo.py --cfg=./models/xx.yaml -cfg_assets ./configs/assets.yaml
+python demo.py --cfg ./configs/config_mld_humanml3d.yaml --cfg_assets ./configs/assets.yaml --example ./demo/example.txt
 ```
 
 Some parameters:

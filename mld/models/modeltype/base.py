@@ -114,7 +114,7 @@ class BaseModel(LightningModule):
                 )
             elif metric == "HUMANACTMetrics":
                 self.HUMANACTMetrics = HUMANACTMetrics(
-                    datapath=os.path.join(self.cfg.MODEL.HUMANACT12_REC_PATH,
+                    datapath=os.path.join(self.cfg.model.HUMANACT12_REC_PATH,
                                           "humanact12_gru.tar"),
                     diversity_times=30
                     if self.debug else self.cfg.TEST.DIVERSITY_TIMES,
@@ -149,7 +149,7 @@ class BaseModel(LightningModule):
         output_dir = Path(
             os.path.join(
                 cfg.FOLDER,
-                str(cfg.MODEL.MODEL_TYPE),
+                str(cfg.model.model_type),
                 str(cfg.NAME),
                 "samples_" + cfg.TIME,
             ))

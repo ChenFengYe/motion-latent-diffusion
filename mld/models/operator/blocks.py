@@ -8,7 +8,7 @@ class MLP(nn.Module):
 
     def __init__(self, cfg, out_dim, is_init):
         super(MLP, self).__init__()
-        dims = cfg.MODEL.MOTION_DECODER.MLP_DIM
+        dims = cfg.model.MOTION_DECODER.MLP_DIM
         n_blk = len(dims)
         norm = 'none'
         acti = 'lrelu'

@@ -32,7 +32,7 @@ def main():
     # create logger
     logger = create_logger(cfg, phase="test")
     output_dir = Path(
-        os.path.join(cfg.FOLDER, str(cfg.MODEL.MODEL_TYPE), str(cfg.NAME))
+        os.path.join(cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME))
     )
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -49,7 +49,7 @@ def main():
 
     # create model
     model = get_model(cfg, datasets[0])
-    logger.info("model {} loaded".format(cfg.MODEL.MODEL_TYPE))
+    logger.info("model {} loaded".format(cfg.model.model_type))
 
     # optimizer
     # metric_monitor = {

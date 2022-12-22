@@ -40,7 +40,7 @@ def render_cli() -> None:
     # parse options
     cfg = parse_args(phase="render")  # parse config file
     cfg.FOLDER = cfg.RENDER.FOLDER
-    # output_dir = Path(os.path.join(cfg.FOLDER, str(cfg.MODEL.MODEL_TYPE) , str(cfg.NAME)))
+    # output_dir = Path(os.path.join(cfg.FOLDER, str(cfg.model.model_type) , str(cfg.NAME)))
     # create logger
     # logger = create_logger(cfg, phase='render')
 

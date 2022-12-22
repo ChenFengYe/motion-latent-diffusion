@@ -87,7 +87,7 @@ def main():
         text = [text]
 
     output_dir = Path(
-        os.path.join(cfg.FOLDER, str(cfg.MODEL.MODEL_TYPE), str(cfg.NAME),
+        os.path.join(cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME),
                      "samples_" + cfg.TIME))
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -149,7 +149,7 @@ def main():
 
     model.load_state_dict(state_dict, strict=True)
 
-    logger.info("model {} loaded".format(cfg.MODEL.MODEL_TYPE))
+    logger.info("model {} loaded".format(cfg.model.model_type))
     model.sample_mean = cfg.TEST.MEAN
     model.fact = cfg.TEST.FACT
     model.to(device)

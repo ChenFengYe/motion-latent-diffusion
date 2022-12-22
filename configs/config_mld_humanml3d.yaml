@@ -31,7 +31,7 @@ EVAL:
 
 # Test Configuration
 TEST:
-  CHECKPOINTS: experiments/mdiffuse/MDiffuse_1213_fixtimeemb_PELearn_Diff_VaeMdiffuseLatent1KL1e4_MEncDec49_MdiffEnc49_bs64_clip_uncond75_030/checkpoints/epoch=1999.ckpt # Pretrained model path
+  CHECKPOINTS: ./models/mld_humanml3d_checkpoint/1222_mld_humanml3d_FID041.ckpt # Pretrained model path
   DATASETS: ['humanml3d'] # training datasets
   SPLIT: test
   BATCH_SIZE: 32 # training Batch size
