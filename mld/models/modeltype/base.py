@@ -8,7 +8,6 @@ from os.path import join as pjoin
 
 
 class BaseModel(LightningModule):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.times = []

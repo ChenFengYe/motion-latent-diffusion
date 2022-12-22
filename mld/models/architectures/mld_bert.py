@@ -10,7 +10,6 @@ from mld.utils.temos_utils import lengths_to_mask
 
 
 class MLDTextEncoder(nn.Module):
-
     def __init__(self,
                  cfg,
                  modelpath: str,
@@ -75,8 +74,8 @@ class MLDTextEncoder(nn.Module):
                                                      num_layers=num_layers)
 
         # for action part
-        # self.is_action_branch = cfg.MODEL.DIST_ADAIN
-        # self.is_cross_token = cfg.MODEL.CROSS_TOKEN
+        # self.is_action_branch = cfg.model.DIST_ADAIN
+        # self.is_cross_token = cfg.model.CROSS_TOKEN
         # if self.is_cross_token:
         #     self.mean_token = nn.Parameter(torch.randn(latent_dim))
         #     self.std_token = nn.Parameter(torch.randn(latent_dim))
