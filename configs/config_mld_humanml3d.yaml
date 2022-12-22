@@ -1,4 +1,4 @@
-NAME: 1222_PELearn_Diff_VaeMdiffuseLatent1KL1e4_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
+NAME: 1222_PELearn_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
 DEBUG: False # Debug mode
 ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
 DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]
@@ -18,7 +18,7 @@ TRAIN:
   START_EPOCH: 0 # Start epochMMOTIONENCODER
   END_EPOCH: 2000 # End epoch
   RESUME: '' # Resume training from this path
-  PRETRAINED_VAE: mld_humanml3d.ckpt
+  PRETRAINED_VAE: mld_humanml3d.ckpt # vae model path
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate

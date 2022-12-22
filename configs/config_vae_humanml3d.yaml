@@ -1,4 +1,4 @@
-NAME: 1222_PELearn_VAE_VaeMdiffuseLatent1KL1e4_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
+NAME: 1222_PELearn_VAE_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
 DEBUG: False # Debug mode
 ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
 DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]

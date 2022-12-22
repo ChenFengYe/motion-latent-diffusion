@@ -55,13 +55,14 @@ bash prepare/download_t2m_evaluators.sh
 Run the script to download the pre-train model
 
 ```
-xxx
+bash prepare/download_pretrained_models.sh
 ```
 
 ### 4. (Optional) Download manually
-Visit [the Google Driver](xxx) to download the previous dependencies and model.
-</details>
 
+Visit [the Google Driver](https://drive.google.com/drive/folders/1U93wvPsqaSzb5waZfGFVYc4tLCAOmB4C) to download the previous dependencies and model.
+
+</details>
 
 ## ▶️ Demo
 
@@ -97,13 +98,14 @@ The outputs:
 ### 1. Prepare the datasets
 
 ### 2. Ready to train
-Please first check the parameters in ``configs/config_mld_humanml3d.yaml``, e.g. ``NAME``,``DEBUG``. 
+
+Please first check the parameters in `configs/config_mld_humanml3d.yaml`, e.g. `NAME`,`DEBUG`.
 
 Then, run the following command:
+
 ```
 python -m train --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/assets.yaml --batch_size 64
 ```
-
 
 ### 3. Evaluate the model
 
