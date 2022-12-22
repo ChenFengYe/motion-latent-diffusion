@@ -4,31 +4,31 @@ TEST:
   FOLDER: './results' # Testing files saving path
 
 DATASET:
-  SMPL_PATH: '../deps/smpl'
-  TRANSFORM_PATH: '../deps/transforms/'
-  WORD_VERTILIZER_PATH: '../deps/glove/'
+  SMPL_PATH: './deps/smpl'
+  TRANSFORM_PATH: './deps/transforms/'
+  WORD_VERTILIZER_PATH: './deps/glove/'
   KIT:
-    ROOT: '../datasets/kit-ml' # KIT directory
-    SPLIT_ROOT: '../datasets/kit-ml' # KIT splits directory
+    ROOT: './datasets/kit-ml' # KIT directory
+    SPLIT_ROOT: './datasets/kit-ml' # KIT splits directory
   HUMANML3D:
-    ROOT: '../datasets/humanml3d' # HumanML3D directory
-    SPLIT_ROOT: '../datasets/humanml3d' # HumanML3D splits directory
+    ROOT: './datasets/humanml3d' # HumanML3D directory
+    SPLIT_ROOT: './datasets/humanml3d' # HumanML3D splits directory
   HUMANACT12:
-    ROOT: ../datasets/HumanAct12Poses
-    SPLIT_ROOT: ../datasets/HumanAct12Poses
+    ROOT: ./datasets/HumanAct12Poses
+    SPLIT_ROOT: ./datasets/HumanAct12Poses
   UESTC:
-    ROOT: ../datasets/uestc
-    SPLIT_ROOT: ../datasets/uestc
+    ROOT: ./datasets/uestc
+    SPLIT_ROOT: ./datasets/uestc
   AMASS:
     DB_ROOT: /apdcephfs/share_1227775/shingxchen/uicap/data/vibe_db
 
 model:
-  bert_path: '../deps/distilbert-base-uncased' # bert model path for all text encoders
-  clip_path: '../deps/clip-vit-large-patch14' # bert model path for all text encoders
-  t2m_path: '../deps/t2m/'
+  bert_path: './deps/distilbert-base-uncased' # bert model path for all text encoders
+  clip_path: './deps/clip-vit-large-patch14' # bert model path for all text encoders
+  t2m_path: './deps/t2m/'
 
-  humanact12_rec_path: '../deps/actionrecognition'
-  uestc_rec_path: '../deps/actionrecognition'
+  humanact12_rec_path: './deps/actionrecognition'
+  uestc_rec_path: './deps/actionrecognition'
   # Set model path separately for different encoders
   # TEXT_ENCODER:
   #   MODELPATH: './deps/distilbert-base-uncased' # bert model path for text encoder

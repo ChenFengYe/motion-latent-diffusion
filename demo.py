@@ -264,9 +264,7 @@ def main():
         print(f'MLD Infer time - This/Ave batch: {infer_time/num_batch:.2f}')
         print(f'MLD Infer FPS - Total batch: {num_all_frame/infer_time:.2f}')
         print(
-            f'MLD Infer FPS - Running Poses Per Second: {num_ave_frame*infer_time/num_batch:.2f}'
-        )
-            f'MLD Average Infer time Per batch: {infer_time/num_batch:.2f}s')
+            f'MLD Infer FPS - Running Poses Per Second: {num_ave_frame*infer_time/num_batch:.2f}')
         print(
             f'MLD Infer FPS - {num_all_frame/infer_time:.2f}s')
         print(

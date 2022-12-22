@@ -1,7 +1,7 @@
 NAME: 1222_PELearn_Diff_VaeMdiffuseLatent1KL1e4_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
-DEBUG: True # Debug mode
+DEBUG: False # Debug mode
 ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
-DEVICE: [0, 1, 2, 3, 4, 5, 6, 7] # Index of gpus eg. [0] or [0,1,2,3]
+DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]
 
 # Training configuration
 TRAIN:
