@@ -9,6 +9,10 @@
 
 Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** diffusion model. Our work achieves **state-of-the-art** motion quality and two orders of magnitude **faster** than previous diffusion models on raw motion data.
 
+<p float="center">
+  <img src="https://user-images.githubusercontent.com/16475892/209251515-ea88127b-0783-4a88-a8c1-2e478f7210a2.png" width="800" />
+</p>
+
 ## 🚩 News
 
 22/Dec/2022 - first release, demo, and training for text-to-motion
@@ -17,8 +21,6 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 
 ## ⚡ Quick Start
 
-<details>
-  <summary><b>Setup envs</b></summary>
 
 ### 1. Conda environment
 
@@ -62,7 +64,6 @@ bash prepare/download_pretrained_models.sh
 
 Visit [the Google Driver](https://drive.google.com/drive/folders/1U93wvPsqaSzb5waZfGFVYc4tLCAOmB4C) to download the previous dependencies and model.
 
-</details>
 
 ## ▶️ Demo
 
