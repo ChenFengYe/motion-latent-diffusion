@@ -8,7 +8,6 @@ from os.path import join as pjoin
 
 
 class BaseModel(LightningModule):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.times = []
@@ -89,6 +88,9 @@ class BaseModel(LightningModule):
         self.cfg.TEST.REP_I = self.cfg.TEST.REP_I + 1
         return self.allsplit_epoch_end("test", outputs)
 
+    def on_save_checkpoint(self, checkpoint):
+        checkpoint["something_cool_i_want_to_save"] = my_cool_pickable_object
+
     def configure_optimizers(self):
         return {"optimizer": self.optimizer}
 
@@ -114,7 +116,7 @@ class BaseModel(LightningModule):
                 )
             elif metric == "HUMANACTMetrics":
                 self.HUMANACTMetrics = HUMANACTMetrics(
-                    datapath=os.path.join(self.cfg.model.HUMANACT12_REC_PATH,
+                    datapath=os.path.join(self.cfg.model.humanact12_rec_path,
                                           "humanact12_gru.tar"),
                     diversity_times=30
                     if self.debug else self.cfg.TEST.DIVERSITY_TIMES,

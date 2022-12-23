@@ -10,7 +10,6 @@ from mld.utils.temos_utils import lengths_to_mask
 
 
 class MLDTextEncoder(nn.Module):
-
     def __init__(self,
                  cfg,
                  modelpath: str,

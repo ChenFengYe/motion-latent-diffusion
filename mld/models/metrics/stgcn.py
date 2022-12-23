@@ -39,7 +39,7 @@ class UESTCMetrics(Metric):
             },
             edge_importance_weighting=True)
         # load pretrianed
-        model_path = os.path.join(cfg.model.UESTC_REC_PATH,
+        model_path = os.path.join(cfg.MODEL.UESTC_REC_PATH,
                                   "uestc_rot6d_stgcn.tar")
         a2m_checkpoint = torch.load(model_path)
         self.stgcn_classifier.load_state_dict(a2m_checkpoint)

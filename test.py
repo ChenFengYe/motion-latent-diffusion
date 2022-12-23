@@ -103,20 +103,9 @@ def main():
     # loading state dict
     logger.info("Loading checkpoints from {}".format(cfg.TEST.CHECKPOINTS))
 
-    # ckpt = torch.load(cfg.TEST.CHECKPOINTS, map_location="cpu")
-    # model.load_state_dict(ckpt["state_dict"], strict=False)
-    logger.info("Loading pretrain mode from {}".format(cfg.TRAIN.PRETRAINED))
     state_dict = torch.load(cfg.TEST.CHECKPOINTS,
                             map_location="cpu")["state_dict"]
-
-    # remove mismatched and unused params
-    from collections import OrderedDict
-
-    # for old experiments, to be removed
-    new_state_dict = OrderedDict()
-    for k, v in state_dict.items():
-        new_state_dict[k.replace("denoiser.decoder.0", "denoiser.decoder")] = v
-    model.load_state_dict(new_state_dict, strict=True)
+    model.load_state_dict(state_dict)
 
     all_metrics = {}
     replication_times = cfg.TEST.REPLICATION_TIMES

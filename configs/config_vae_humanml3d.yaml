@@ -1,4 +1,4 @@
-NAME: 1222_PELearn_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
+NAME: 1222_PELearn_VAE_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
 DEBUG: False # Debug mode
 ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
 DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]
@@ -6,19 +6,19 @@ DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]
 # Training configuration
 TRAIN:
   #---------------------------------
-  STAGE: diffusion # stage "vae" or "diffusion", "vae_diffusion"
+  STAGE: vae # stage "vae" or "diffusion", "vae_diffusion"
   #---------------------------------
   ABLATION:
     SKIP_CONNECT: True
     PE_TYPE: mld
     DIFF_PE_TYPE: mld
   DATASETS: ['humanml3d'] # Training datasets
-  NUM_WORKERS: 8 # Number of workers
-  BATCH_SIZE: 64 # Size of batches
+  NUM_WORKERS: 11 # Number of workers
+  BATCH_SIZE: 128 # Size of batches
   START_EPOCH: 0 # Start epochMMOTIONENCODER
-  END_EPOCH: 2000 # End epoch
+  END_EPOCH: 6000 # End epoch
   RESUME: '' # Resume training from this path
-  PRETRAINED_VAE: '' # vae model path
+  PRETRAINED_VAE: ''
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate
@@ -31,7 +31,7 @@ EVAL:
 
 # Test Configuration
 TEST:
-  CHECKPOINTS: ./models/mld_humanml3d_checkpoint/1222_mld_humanml3d_FID041.ckpt # Pretrained model path
+  CHECKPOINTS: '' # Pretrained model path
   DATASETS: ['humanml3d'] # training datasets
   SPLIT: test
   BATCH_SIZE: 32 # training Batch size
