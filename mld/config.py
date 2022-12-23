@@ -146,7 +146,7 @@ def parse_args(phase="train"):
     # update config from files
     cfg_base = OmegaConf.load('./configs/base.yaml')
     cfg_exp = OmegaConf.load(params.cfg)
-    cfg_model = get_module_config(cfg_exp.model)
+    cfg_model = get_module_config(cfg_base.model)
     cfg_assets = OmegaConf.load(params.cfg_assets)
     cfg = OmegaConf.merge(cfg_base, cfg_exp, cfg_model, cfg_assets)
 
