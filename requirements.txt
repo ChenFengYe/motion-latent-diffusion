@@ -1,0 +1,24 @@
+pytorch_lightning 
+torchmetrics==0.7
+omegaconf
+shortuuid
+tqdm
+pandas
+# sklearn
+chumpy
+transformers
+psutil
+einops
+yacs
+wandb
+rich
+# for fitting
+smplx==0.1.28
+trimesh==3.9.24
+# pyyaml==5.4.1
+h5py
+joblib==1.2.0
+scikit-image
+spacy
+diffusers
+ftfy
