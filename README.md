@@ -130,7 +130,7 @@ python -m test --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/asse
 Refer to [TEMOS-Rendering motions](https://github.com/Mathux/TEMOS) for blender setup, then install the following dependencies.
 
 ```
-YOUR_BLENDER_PATH/blender --background --python -m pip install -r prepare/requirements_render.txt
+YOUR_BLENDER_PYTHON_PATH/python -m pip install -r prepare/requirements_render.txt
 ```
 
 ### 2. (Optional) Render rigged cylinders
