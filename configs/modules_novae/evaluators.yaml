@@ -1,0 +1,20 @@
+t2m_textencoder:
+  target: mld.models.architectures.t2m_textenc.TextEncoderBiGRUCo
+  params:
+    word_size: 300
+    pos_size: 15
+    hidden_size: 512
+    output_size: 512
+
+t2m_moveencoder:
+  target: mld.models.architectures.t2m_textenc.MovementConvEncoder
+  params:
+    hidden_size: 512
+    output_size: 512
+
+t2m_motionencoder:
+  target: mld.models.architectures.t2m_motionenc.MotionEncoder
+  params:
+    input_size: ${model.t2m_moveencoder.output_size}
+    hidden_size: 1024
+    output_size: 512
