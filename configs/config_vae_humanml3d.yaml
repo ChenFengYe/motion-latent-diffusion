@@ -77,6 +77,6 @@ LOGGER:
   VAL_EVERY_STEPS: 200
   TENSORBOARD: True
   WANDB:
-    PROJECT: mdiffuse
+    PROJECT: None
     OFFLINE: False
     RESUME_ID: None
