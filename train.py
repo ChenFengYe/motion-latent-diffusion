@@ -61,7 +61,7 @@ def main():
 
     # tensorboard logger and wandb logger
     loggers = []
-    if cfg.LOGGER.WANDB.PROJECT != None:
+    if not isinstance(cfg.LOGGER.WANDB.PROJECT, str):
         wandb_logger = pl_loggers.WandbLogger(
             project=cfg.LOGGER.WANDB.PROJECT,
             offline=cfg.LOGGER.WANDB.OFFLINE,
@@ -74,6 +74,7 @@ def main():
         )
         loggers.append(wandb_logger)
     if cfg.LOGGER.TENSORBOARD:
+        print(cfg.LOGGER.WANDB.PROJECT)
         tb_logger = pl_loggers.TensorBoardLogger(save_dir=cfg.FOLDER_EXP,
                                                  sub_dir="tensorboard",
                                                  version="",
