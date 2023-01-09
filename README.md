@@ -15,6 +15,8 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 
 ## 🚩 News
 
+09/Jan/2023 - release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
+
 22/Dec/2022 - first release, demo, and training for text-to-motion
 
 08/Dec/2022 - upload paper and init project, code will be released in two weeks
@@ -97,10 +99,21 @@ The outputs:
   <summary><b>WIP</b></summary>
 
 ### 1. Prepare the datasets
+Please refer to [HumanML3D](https://github.com/EricGuo5513/HumanML3D) for text-to-motion dataset setup.
+We will provide instructions for other datasets soon.
 
-### 2. Ready to train
+### 2.1. Ready to train VAE model
+Please first check the parameters in `configs/config_vae_humanml3d.yaml`, e.g. `NAME`,`DEBUG`.
 
-Please first check the parameters in `configs/config_mld_humanml3d.yaml`, e.g. `NAME`,`DEBUG`.
+Then, run the following command:
+
+```
+python -m train --cfg configs/config_vae_humanml3d.yaml --cfg_assets configs/assets.yaml --batch_size 64 --nodebug
+```
+
+### 2.2. Ready to train MLD model
+
+Please update the parameters in `configs/config_mld_humanml3d.yaml`, e.g. `NAME`,`DEBUG`,`PRETRAINED_VAE` (change to your `latest ckpt model path` in previous step)
 
 Then, run the following command:
 
