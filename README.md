@@ -105,7 +105,7 @@ Please first check the parameters in `configs/config_mld_humanml3d.yaml`, e.g. `
 Then, run the following command:
 
 ```
-python -m train --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/assets.yaml --batch_size 64
+python -m train --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/assets.yaml --batch_size 64 --nodebug
 ```
 
 ### 3. Evaluate the model
