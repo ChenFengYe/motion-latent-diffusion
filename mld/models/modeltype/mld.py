@@ -29,7 +29,6 @@ class MLD(BaseModel):
     Stage 1 vae
     Stage 2 diffusion
     """
-
     def __init__(self, cfg, datamodule, **kwargs):
         super().__init__()
 
@@ -47,11 +46,16 @@ class MLD(BaseModel):
         self.guidance_uncodp = cfg.model.guidance_uncondp
         self.datamodule = datamodule
 
-        self.vae_type = cfg.model.motion_vae.target.split(".")[-1].lower().replace("vae", "")
+        try:
+            self.vae_type = cfg.model.vae_type
+        except:
+            self.vae_type = cfg.model.motion_vae.target.split(".")[-1].lower().replace(
+                "vae", "")
 
         self.text_encoder = instantiate_from_config(cfg.model.text_encoder)
 
-        self.vae = instantiate_from_config(cfg.model.motion_vae)
+        if self.vae_type != "no":
+            self.vae = instantiate_from_config(cfg.model.motion_vae)
 
         # Don't train the motion encoder and decoder
         if self.stage == "diffusion":

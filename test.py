@@ -7,6 +7,7 @@ import pytorch_lightning as pl
 import torch
 from rich import get_console
 from rich.table import Table
+from omegaconf import OmegaConf
 
 from mld.callback import ProgressLogger
 from mld.config import parse_args
@@ -45,6 +46,7 @@ def main():
         os.path.join(cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME),
                      "samples_" + cfg.TIME))
     output_dir.mkdir(parents=True, exist_ok=True)
+    logger.info(OmegaConf.to_yaml(cfg))
 
     # set seed
     pl.seed_everything(cfg.SEED_VALUE)

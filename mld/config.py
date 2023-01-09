@@ -3,11 +3,12 @@ from argparse import ArgumentParser
 from omegaconf import OmegaConf
 import os
 
-def get_module_config(cfg_model):
-    files = os.listdir('./configs/modules/')
+
+def get_module_config(cfg_model, path="modules"):
+    files = os.listdir(f'./configs/{path}/')
     for file in files:
         if file.endswith('.yaml'):
-            with open('./configs/modules/' + file, 'r') as f:
+            with open(f'./configs/{path}/' + file, 'r') as f:
                 cfg_model.merge_with(OmegaConf.load(f))
     return cfg_model
 
@@ -145,10 +146,10 @@ def parse_args(phase="train"):
 
     # update config from files
     cfg_base = OmegaConf.load('./configs/base.yaml')
-    cfg_exp = OmegaConf.load(params.cfg)
-    cfg_model = get_module_config(cfg_base.model)
+    cfg_exp = OmegaConf.merge(cfg_base, OmegaConf.load(params.cfg))
+    cfg_model = get_module_config(cfg_exp.model, cfg_exp.model.target)
     cfg_assets = OmegaConf.load(params.cfg_assets)
-    cfg = OmegaConf.merge(cfg_base, cfg_exp, cfg_model, cfg_assets)
+    cfg = OmegaConf.merge(cfg_exp, cfg_model, cfg_assets)
 
     if phase in ["train", "test"]:
         cfg.TRAIN.BATCH_SIZE = (params.batch_size

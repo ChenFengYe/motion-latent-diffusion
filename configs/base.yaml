@@ -46,6 +46,7 @@ TEST:
   DIVERSITY_TIMES: 300 # Number of times to repeat the diversity test
   REP_I: 0
 model:
+  target: 'modules'
   t2m_textencoder:
     dim_word: 300
     dim_pos_ohot: 15
