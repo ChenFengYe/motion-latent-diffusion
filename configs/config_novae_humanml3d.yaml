@@ -79,6 +79,6 @@ LOGGER:
   VAL_EVERY_STEPS: 200
   TENSORBOARD: True
   WANDB:
-    PROJECT: None
+    PROJECT: null
     OFFLINE: False
-    RESUME_ID: None
+    RESUME_ID: null
