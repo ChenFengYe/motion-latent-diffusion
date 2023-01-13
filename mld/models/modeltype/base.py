@@ -88,9 +88,6 @@ class BaseModel(LightningModule):
         self.cfg.TEST.REP_I = self.cfg.TEST.REP_I + 1
         return self.allsplit_epoch_end("test", outputs)
 
-    def on_save_checkpoint(self, checkpoint):
-        checkpoint["something_cool_i_want_to_save"] = my_cool_pickable_object
-
     def configure_optimizers(self):
         return {"optimizer": self.optimizer}
 
