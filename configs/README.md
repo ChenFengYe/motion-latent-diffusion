@@ -51,7 +51,7 @@ In conclusion, our network mainly combines the five components below.
 **By default**, the program will use the yaml files in `configs/modules` folder as the configuration for each part of network. If you want to change the configurations of some part of network, you have two methods:
 
 1. Directly modify the `traget` to use different structure and `params` to modify the parameters.
-2. Create a new set of module configurations, you can create 5 new yaml files by refering the annotations in [configs/modules](./configs/modules) files **in subfoler of `configs`**. Then specify the your modules folder name `model.target` in Experiment Configuration. Take [config_novae_humanml3d.yaml](./config_novae_humanml3d.yaml) as an example, we specify the `model.target=modules_novae` which means the experiment model will use the configuration files in `configs/modules_novae`.
+2. Create a new set of module configurations, you can create 5 new yaml files by refering the annotations in [configs/modules](./modules) files **in subfoler of `configs`**. Then specify the your modules folder name `model.target` in Experiment Configuration. Take [config_novae_humanml3d.yaml](./config_novae_humanml3d.yaml) as an example, we specify the `model.target=modules_novae` which means the experiment model will use the configuration files in `configs/modules_novae`.
 
 ### Experiment Configuration
 
