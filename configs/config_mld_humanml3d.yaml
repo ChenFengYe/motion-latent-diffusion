@@ -1,35 +1,56 @@
-NAME: 1222_PELearn_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01 # Experiment name
-DEBUG: False # Debug mode
-ACCELERATOR: 'gpu' # Devices optioncal: “cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”
-DEVICE: [0] # Index of gpus eg. [0] or [0,1,2,3]
+####################################
+# The following are general settings
+####################################
 
-# Training configuration
+# Experiment name, more details in Section 'Experiment Name Explanation'
+NAME: 1222_PELearn_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01
+# Debug mode. Set to True will enter the debug mode, then the program will
+# 1. use a tiny dataset for trianing and evaluation
+# 2. validate more intensively
+# 3. will not use `wandb logger`
+DEBUG: False
+# Devices. Optional: “cpu”, “gpu”
+ACCELERATOR: 'gpu'
+# Index of GPUs eg. [0] or [0,1,2,3]
+DEVICE: [0]
+
+#####################################
+# The following are training settings
+#####################################
 TRAIN:
-  #---------------------------------
-  STAGE: diffusion # stage "vae" or "diffusion", "vae_diffusion"
-  #---------------------------------
-  ABLATION:
-    SKIP_CONNECT: True
-    PE_TYPE: mld
-    DIFF_PE_TYPE: mld
-  DATASETS: ['humanml3d'] # Training datasets
-  NUM_WORKERS: 8 # Number of workers
-  BATCH_SIZE: 64 # Size of batches
-  START_EPOCH: 0 # Start epochMMOTIONENCODER
-  END_EPOCH: 2000 # End epoch
+  # Model stage. Optional: "vae", "diffusion"
+  STAGE: diffusion
+  # Training dataset name
+  DATASETS: ['humanml3d']
+  # Number of dataloader workers
+  NUM_WORKERS: 8
+  # Size of batches
+  BATCH_SIZE: 64
+  # Total epochs for training
+  END_EPOCH: 2000
+
   RESUME: '' # Resume training from this path
   PRETRAINED_VAE: '' # vae model path
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate
+  # Ablation study configurations.
+  ABLATION:
+    SKIP_CONNECT: True
+    PE_TYPE: mld
+    DIFF_PE_TYPE: mld
 
-# Evaluating Configuration
+#####################################
+# The following are validation settings
+#####################################
 EVAL:
   DATASETS: ['humanml3d'] # Evaluating datasets
   BATCH_SIZE: 32 # Evaluating Batch size
   SPLIT: test
 
-# Test Configuration
+#####################################
+# The following are testing settings
+#####################################
 TEST:
   CHECKPOINTS: ./models/mld_humanml3d_checkpoint/1222_mld_humanml3d_FID041.ckpt # Pretrained model path
   DATASETS: ['humanml3d'] # training datasets
@@ -39,12 +60,21 @@ TEST:
   NUM_SAMPLES: 1
   FACT: 1
 
-# Datasets Configuration
+#####################################
+# The following are basic datasets settings
+#####################################
 DATASET:
   JOINT_TYPE: 'humanml3d' # join type
+
+#####################################
+# The following are metric settings
+#####################################
 METRIC:
   TYPE: ['TemosMetric', 'TM2TMetrics']
-# Losses Configuration
+
+#####################################
+# The following are training losses settings
+#####################################
 LOSS:
   TYPE: mld # Losses type
   LAMBDA_LATENT: 1.0e-5 # Lambda for latent Losses
@@ -56,7 +86,9 @@ LOSS:
   LAMBDA_PRIOR: 0.0
   DIST_SYNC_ON_STEP: False # Sync Losses on step when distributed trained
 
-# Model Configuration
+#####################################
+# The following are basic model settings
+#####################################
 model:
   vae: true # whether vae model
   model_type: mld # model type
@@ -70,7 +102,9 @@ model:
   guidance_scale: 7.5 #
   guidance_uncondp: 0.1 # 0.1 0.25
 
-# Logger configuration
+#####################################
+# The following are loggers settings
+#####################################
 LOGGER:
   SACE_CHECKPOINT_EPOCH: 200
   LOG_EVERY_STEPS: 1

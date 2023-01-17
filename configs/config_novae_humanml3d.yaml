@@ -31,7 +31,7 @@ EVAL:
 
 # Test Configuration
 TEST:
-  CHECKPOINTS: /apdcephfs/share_1227775/shingxchen/AIMotion/TMOSTData/exps/mdiffuse/MDiffuse_1216_novae_predx_PELearn_Skip_mdmLike_MdiffDec49_bs64_clip_uncond75_01/checkpoints/epoch=12399.ckpt # Pretrained model path
+  CHECKPOINTS: ./models/novae_humanml3d_checkpoint/1216_novae_humanml3d.ckpt # Pretrained model path
   DATASETS: ['humanml3d'] # training datasets
   SPLIT: test
   BATCH_SIZE: 32 # training Batch size
