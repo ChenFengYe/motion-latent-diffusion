@@ -23,7 +23,6 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 
 ## ⚡ Quick Start
 
-
 ### 1. Conda environment
 
 ```
@@ -66,7 +65,6 @@ bash prepare/download_pretrained_models.sh
 
 Visit [the Google Driver](https://drive.google.com/drive/folders/1U93wvPsqaSzb5waZfGFVYc4tLCAOmB4C) to download the previous dependencies and model.
 
-
 ## ▶️ Demo
 
 <details>
@@ -99,10 +97,12 @@ The outputs:
   <summary><b>WIP</b></summary>
 
 ### 1. Prepare the datasets
+
 Please refer to [HumanML3D](https://github.com/EricGuo5513/HumanML3D) for text-to-motion dataset setup.
 We will provide instructions for other datasets soon.
 
 ### 2.1. Ready to train VAE model
+
 Please first check the parameters in `configs/config_vae_humanml3d.yaml`, e.g. `NAME`,`DEBUG`.
 
 Then, run the following command:
@@ -180,6 +180,7 @@ optional parameters:
 </details>
 
 ## ❓ FAQ
+
 <details>
   <summary><b>Details of training</b></summary>
   
@@ -193,6 +194,10 @@ https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5
 7. **FID.** FID of validation will drop to 0.5~1 after 1500 epochs for both VAE and MLD training. By default, validation is on test split...https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L30
 </details>
 
+<details>
+  <summary><b>Details of config</b></summary>
+We use yaml files for configuration. For more details, you can see <a href="./configs/README.MD">Configuration Docs</a>.
+</details>
 ## Citation
 
 If you find our code or paper helps, please consider citing:
