@@ -67,4 +67,6 @@ For more details of the configuration, you can refer to the annotations in [conf
 
 ### Default Configuration
 
-The default configuration defines the default settings and will be overwritten by the configurations above. **By default**, the program will use the yaml file `configs/base.yaml` folder as the basic configuration.
+The default configuration defines the default settings and will be overwritten by the configurations above.
+
+**By default**, the program will use the yaml file `configs/base.yaml` folder as the basic configuration.
