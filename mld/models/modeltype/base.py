@@ -5,6 +5,7 @@ import torch
 from pytorch_lightning import LightningModule
 from mld.models.metrics import ComputeMetrics, MRMetrics, TM2TMetrics, MMMetrics, HUMANACTMetrics, UESTCMetrics, UncondMetrics
 from os.path import join as pjoin
+from collections import OrderedDict
 
 
 class BaseModel(LightningModule):
@@ -89,7 +90,37 @@ class BaseModel(LightningModule):
         return self.allsplit_epoch_end("test", outputs)
 
     def on_save_checkpoint(self, checkpoint):
-        checkpoint["something_cool_i_want_to_save"] = my_cool_pickable_object
+        # don't save clip to checkpoint
+        state_dict = checkpoint['state_dict']
+        clip_k = []
+        for k, v in state_dict.items():
+            if 'text_encoder' in k:
+                clip_k.append(k)
+        for k in clip_k:
+            del checkpoint['state_dict'][k]
+
+    def on_load_checkpoint(self, checkpoint):
+        # restore clip state_dict to checkpoint
+        clip_state_dict = self.text_encoder.state_dict()
+        new_state_dict = OrderedDict()
+        for k, v in clip_state_dict.items():
+            new_state_dict['text_encoder.' + k] = v
+        for k, v in checkpoint['state_dict'].items():
+            if 'text_encoder' not in k:
+                new_state_dict[k] = v
+        checkpoint['state_dict'] = new_state_dict
+
+    def load_state_dict(self, state_dict, strict=True):
+        # load clip state_dict to checkpoint
+        clip_state_dict = self.text_encoder.state_dict()
+        new_state_dict = OrderedDict()
+        for k, v in clip_state_dict.items():
+            new_state_dict['text_encoder.' + k] = v
+        for k, v in state_dict.items():
+            if 'text_encoder' not in k:
+                new_state_dict[k] = v
+
+        super().load_state_dict(new_state_dict, strict)
 
     def configure_optimizers(self):
         return {"optimizer": self.optimizer}
