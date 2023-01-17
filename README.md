@@ -179,6 +179,20 @@ optional parameters:
 - `--mode=sequence`: render the whole motion in a png image.
 </details>
 
+## ❓ FAQ
+<details>
+  <summary><b>Details of training</b></summary>
+  
+1. **GPUs.** You can indicate the IDs to use all your GPUs.  https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L4
+2.  **Epoch Nums.** 1500~3000 epoch is enough for VAE or MLD. I suggest you use **wandb**(prefer) or **tensorborad** to check FID curve of your training.
+3. **Training Speed.** 2000 epoch could cost 1 day for a single GPU, and around 12 hours for 8 GPUs. Training speed also depends on ``VAL_EVERY_STEPS`` (Validation Frequency), DataIO Speed. Your training is a little slow.
+https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L77
+4. **Data Log.** Only loss print by default. After validation, more metrics of val will print. More details in wandb (prefer) or tensorborad.
+5. **Debug or not.** Please use ``--nodebug`` for all your training.
+6. **VAE loading.** Please load your pre-train VAE correctly for the MLD diffusion training.
+7. **FID.** FID of validation will drop to 0.5~1 after 1500 epochs for both VAE and MLD training. By default, validation is on test split...https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L30
+</details>
+
 ## Citation
 
 If you find our code or paper helps, please consider citing:
