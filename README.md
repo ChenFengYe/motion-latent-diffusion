@@ -194,10 +194,8 @@ https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5
 7. **FID.** FID of validation will drop to 0.5~1 after 1500 epochs for both VAE and MLD training. By default, validation is on test split...https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L30
 </details>
 
-<details>
-  <summary><b>Details of config</b></summary>
-We use yaml files for configuration. For more details, you can see <a href="./configs/README.MD">Configuration Docs</a>.
-</details>
+**[Details of configuration](./configs/README.MD)**
+
 ## Citation
 
 If you find our code or paper helps, please consider citing:
