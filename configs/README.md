@@ -6,6 +6,7 @@
     - [Asset Path Configuration](#asset-path-configuration)
     - [Network Structure Configuration](#network-structure-configuration)
     - [Experiment Configuration](#experiment-configuration)
+    - [Default Configuration](#default-configuration)
 
 ## Experiment Name Explanation
 
@@ -23,10 +24,15 @@ Taking `1222_PELearn_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01` as
 
 ## Configuration Explanation
 
-We use yaml files for configuration. For training & evaluation, our whole configurations are combined of 3 parts.
+We use yaml files for configuration. For training & evaluation, our whole configurations are combined of 4 parts.
+
 [Asset Path Configuration](#asset-path-configuration)
+
 [Network Structure Configuration](#network-structure-configuration)
+
 [Experiment Configuration](#experiment-configuration)
+
+[Default Configuration](#default-configuration)
 
 ### Asset Path Configuration
 
@@ -55,6 +61,10 @@ In conclusion, our network mainly combines the five components below.
 
 ### Experiment Configuration
 
-The experiment basic configuration defines the settings apart from network structure like dataset settings, training settings, evaluation settings and so on.
+The experiment configuration defines the settings apart from network structure like dataset settings, training settings, evaluation settings and so on.
 
 For more details of the configuration, you can refer to the annotations in [config_mld_humanml3d.yaml](./config_mld_humanml3d.yaml)
+
+### Default Configuration
+
+The experiment configuration defines the default settings and will be overwritten by the configurations above. **By default**, the program will use the yaml file `configs/base.yaml` folder as the basic configuration.
