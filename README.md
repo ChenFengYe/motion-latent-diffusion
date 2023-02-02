@@ -14,7 +14,9 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 </p>
 
 ## 🚩 News
-18/Jan/2023 - add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of project configuration
+02/Feb/2023 - release action-to-motion task, please ref to [the config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_mld_humanact12.yaml) and [the pre-train model](https://drive.google.com/file/d/1G9O5arldtHvB66OPr31oE_rJG1bH_R39/view)
+
+18/Jan/2023 - add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of the configuration
 
 09/Jan/2023 - release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
 
