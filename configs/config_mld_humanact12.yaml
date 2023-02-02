@@ -19,7 +19,7 @@ DEVICE: [0]
 #####################################
 TRAIN:
   # Model stage. Optional: "vae", "diffusion"
-  STAGE: vae
+  STAGE: diffusion
   # Training dataset name
   DATASETS: ['Humanact12']
   # Number of dataloader workers
@@ -30,7 +30,7 @@ TRAIN:
   END_EPOCH: 2000
 
   RESUME: '' # Resume training from this path
-  PRETRAINED_VAE: '' # vae model path
+  PRETRAINED_VAE: '1109_mld_humanact12.ckpt' # vae model path
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate
