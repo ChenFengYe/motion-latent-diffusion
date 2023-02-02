@@ -66,6 +66,7 @@ def main():
     # create model
     model = get_model(cfg, datasets)
     logger.info("model {} loaded".format(cfg.model.model_type))
+    
 
     # optimizer
     metric_monitor = {

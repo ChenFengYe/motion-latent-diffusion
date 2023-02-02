@@ -42,11 +42,12 @@ def main():
                     cfg.TRAIN.PRETRAINED = os.path.join(
                         resume, "checkpoints", checkpoint)
                     break
-            wandb_list = sorted(os.listdir(os.path.join(resume, "wandb")),
-                                reverse=True)
-            for item in wandb_list:
-                if "run-" in item:
-                    cfg.LOGGER.WANDB.RESUME_ID = item.split("-")[-1]
+            if os.path.exists(os.path.join(resume, "wandb")):
+                wandb_list = sorted(os.listdir(os.path.join(resume, "wandb")),
+                                    reverse=True)
+                for item in wandb_list:
+                    if "run-" in item:
+                        cfg.LOGGER.WANDB.RESUME_ID = item.split("-")[-1]
 
         else:
             raise ValueError("Resume path is not right.")

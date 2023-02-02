@@ -34,7 +34,7 @@ TEST:
   CHECKPOINTS: ./models/novae_humanml3d_checkpoint/1216_novae_humanml3d.ckpt # Pretrained model path
   DATASETS: ['humanml3d'] # training datasets
   SPLIT: test
-  BATCH_SIZE: 32 # training Batch size
+  BATCH_SIZE: 1 # training Batch size
   MEAN: False
   NUM_SAMPLES: 1
   FACT: 1

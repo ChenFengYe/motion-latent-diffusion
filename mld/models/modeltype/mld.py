@@ -29,6 +29,7 @@ class MLD(BaseModel):
     Stage 1 vae
     Stage 2 diffusion
     """
+
     def __init__(self, cfg, datamodule, **kwargs):
         super().__init__()
 
@@ -49,8 +50,8 @@ class MLD(BaseModel):
         try:
             self.vae_type = cfg.model.vae_type
         except:
-            self.vae_type = cfg.model.motion_vae.target.split(".")[-1].lower().replace(
-                "vae", "")
+            self.vae_type = cfg.model.motion_vae.target.split(
+                ".")[-1].lower().replace("vae", "")
 
         self.text_encoder = instantiate_from_config(cfg.model.text_encoder)
 
@@ -74,7 +75,9 @@ class MLD(BaseModel):
                     p.requires_grad = False
 
         self.denoiser = instantiate_from_config(cfg.model.denoiser)
-
+        if not self.predict_epsilon:
+            cfg.model.scheduler.params['prediction_type'] = 'sample'
+            cfg.model.noise_scheduler.params['prediction_type'] = 'sample'
         self.scheduler = instantiate_from_config(cfg.model.scheduler)
         self.noise_scheduler = instantiate_from_config(
             cfg.model.noise_scheduler)
@@ -353,18 +356,18 @@ class MLD(BaseModel):
                     noise_pred_text - noise_pred_uncond)
                 # text_embeddings_for_guidance = encoder_hidden_states.chunk(
                 #     2)[1] if self.do_classifier_free_guidance else encoder_hidden_states
-
-            if self.predict_epsilon:
-                latents = self.scheduler.step(noise_pred, t, latents,
+            latents = self.scheduler.step(noise_pred, t, latents,
                                               **extra_step_kwargs).prev_sample
-            else:
-                # predict x for standard diffusion model
-                # compute the previous noisy sample x_t -> x_t-1
-                latents = self.scheduler.step(noise_pred,
-                                              t,
-                                              latents,
-                                              predict_epsilon=False,
-                                              **extra_step_kwargs).prev_sample
+            # if self.predict_epsilon:
+            #     latents = self.scheduler.step(noise_pred, t, latents,
+            #                                   **extra_step_kwargs).prev_sample
+            # else:
+            #     # predict x for standard diffusion model
+            #     # compute the previous noisy sample x_t -> x_t-1
+            #     latents = self.scheduler.step(noise_pred,
+            #                                   t,
+            #                                   latents,
+            #                                   **extra_step_kwargs).prev_sample
 
         # [batch_size, 1, latent_dim] -> [1, batch_size, latent_dim]
         latents = latents.permute(1, 0, 2)
@@ -598,6 +601,10 @@ class MLD(BaseModel):
         word_embs = batch["word_embs"].detach().clone()
         pos_ohot = batch["pos_ohot"].detach().clone()
         text_lengths = batch["text_len"].detach().clone()
+
+        # start
+        start = time.time()
+
         if self.trainer.datamodule.is_mm:
             texts = texts * self.cfg.TEST.MM_NUM_REPEATS
             motions = motions.repeat_interleave(self.cfg.TEST.MM_NUM_REPEATS,
@@ -644,6 +651,11 @@ class MLD(BaseModel):
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
+
+        # end time
+        end = time.time()
+        self.times.append(end - start)
+
         # joints recover
         joints_rst = self.feats2joints(feats_rst)
         joints_ref = self.feats2joints(motions)

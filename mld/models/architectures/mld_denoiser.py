@@ -143,7 +143,7 @@ class MldDenoiser(nn.Module):
         sample = sample.permute(1, 0, 2)
 
         # 0. check lengths for no vae (diffusion only)
-        if lengths:
+        if lengths not in [None, []]:
             mask = lengths_to_mask(lengths, sample.device)
 
         # 1. time_embedding

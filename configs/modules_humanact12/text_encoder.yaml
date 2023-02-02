@@ -1,0 +1,8 @@
+text_encoder:
+  # Optional: mld_clip, mld_bert
+  target: mld.models.architectures.mld_clip.MldTextEncoder
+  params:
+    finetune: false # if false, model weights are frozen
+    last_hidden_state: false # if true, the last hidden state is used as the text embedding
+    latent_dim: ${model.latent_dim}
+    modelpath: ${model.clip_path}

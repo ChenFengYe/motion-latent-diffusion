@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 
 class BaseModel(LightningModule):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.times = []
@@ -31,6 +32,8 @@ class BaseModel(LightningModule):
         return self.allsplit_step("val", batch, batch_idx)
 
     def test_step(self, batch, batch_idx):
+        if len(self.times) *self.cfg.TEST.BATCH_SIZE % (100) > 0 and len(self.times) > 0:
+            print(f"Average time per sample ({self.cfg.TEST.BATCH_SIZE*len(self.times)}): ", np.mean(self.times)/self.cfg.TEST.BATCH_SIZE)
         return self.allsplit_step("test", batch, batch_idx)
 
     def predict_step(self, batch, batch_idx):
@@ -87,6 +90,7 @@ class BaseModel(LightningModule):
     def test_epoch_end(self, outputs):
         self.save_npy(outputs)
         self.cfg.TEST.REP_I = self.cfg.TEST.REP_I + 1
+
         return self.allsplit_epoch_end("test", outputs)
 
     def on_save_checkpoint(self, checkpoint):

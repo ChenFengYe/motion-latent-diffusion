@@ -3,7 +3,7 @@
 ####################################
 
 # Experiment name, more details in Section 'Experiment Name Explanation'
-NAME: 1222_PELearn_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01
+NAME: 0129_Humanact12_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01
 # Debug mode. Set to True will enter the debug mode, then the program will
 # 1. use a tiny dataset for trianing and evaluation
 # 2. validate more intensively
@@ -19,9 +19,9 @@ DEVICE: [0]
 #####################################
 TRAIN:
   # Model stage. Optional: "vae", "diffusion"
-  STAGE: diffusion
+  STAGE: vae
   # Training dataset name
-  DATASETS: ['humanml3d']
+  DATASETS: ['Humanact12']
   # Number of dataloader workers
   NUM_WORKERS: 8
   # Size of batches
@@ -37,25 +37,25 @@ TRAIN:
   # Ablation study configurations.
   ABLATION:
     SKIP_CONNECT: True
-    PE_TYPE: mld
-    DIFF_PE_TYPE: mld
+    PE_TYPE: actor
+    DIFF_PE_TYPE: actor
 
 #####################################
 # The following are validation settings
 #####################################
 EVAL:
-  DATASETS: ['humanml3d'] # Evaluating datasets
+  DATASETS: ['Humanact12'] # Evaluating datasets
   BATCH_SIZE: 32 # Evaluating Batch size
-  SPLIT: test
+  SPLIT: train
 
 #####################################
 # The following are testing settings
 #####################################
 TEST:
-  CHECKPOINTS: ./models/mld_humanml3d_checkpoint/1222_mld_humanml3d_FID041.ckpt # Pretrained model path
-  DATASETS: ['humanml3d'] # training datasets
-  SPLIT: test
-  BATCH_SIZE: 1 # training Batch size
+  CHECKPOINTS: 1109_mld_humanact12.ckpt # Pretrained model path
+  DATASETS: ['Humanact12'] # training datasets
+  SPLIT: train
+  BATCH_SIZE: 32 # training Batch size
   MEAN: False
   NUM_SAMPLES: 1
   FACT: 1
@@ -64,13 +64,21 @@ TEST:
 # The following are basic datasets settings
 #####################################
 DATASET:
-  JOINT_TYPE: 'humanml3d' # join type
+  JOINT_TYPE: 'Humanact12' # join type
+  SAMPLER:
+    REQUEST_FRAMES: null
+    SAMPLING: conseq
+    SAMPLING_STEP: 1
+    MAX_SQE: -1
+    MAX_LEN: -1
+    MIN_LEN: -1
+    MAX_TEXT_LEN: 20
 
 #####################################
 # The following are metric settings
 #####################################
 METRIC:
-  TYPE: ['TemosMetric', 'TM2TMetrics']
+  TYPE: ['HUMANACTMetrics']
 
 #####################################
 # The following are training losses settings
@@ -90,12 +98,13 @@ LOSS:
 # The following are basic model settings
 #####################################
 model:
+  target: modules_humanact12
   vae: true # whether vae model
   model_type: mld # model type
-  condition: 'text'
+  condition: 'action'
   latent_dim: [1, 256] # latent dimension
   ff_size: 1024 #
-  num_layers: 9 # number of layers
+  num_layers: 15 # number of layers
   num_head: 4 # number of head layers
   droupout: 0.1 # dropout rate
   activation: gelu # activation type
