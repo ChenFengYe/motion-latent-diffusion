@@ -159,35 +159,64 @@ def main():
 
     # sample
     with torch.no_grad():
+        rep_lst = []    
+        rep_ref_lst = []
+        texts_lst = []
         # task: input or Example
         if text:
             # prepare batch data
             batch = {"length": length, "text": text}
+            
+            for rep in range(cfg.DEMO.REPLICATION):
+                # text motion transfer
+                if cfg.DEMO.MOTION_TRANSFER:
+                    joints = model.forward_motion_style_transfer(batch)
+                # text to motion synthesis
+                else:
+                    joints = model(batch)
 
-            # text motion transfer
-            if cfg.DEMO.MOTION_TRANSFER:
-                joints = model.forward_motion_style_transfer(batch)
-            # text to motion synthesis
-            else:
-                joints = model(batch)
+                # cal inference time
+                infer_time = time.time() - mld_time
+                num_batch = 1
+                num_all_frame = sum(batch["length"])
+                num_ave_frame = sum(batch["length"]) / len(batch["length"])
 
-            # cal inference time
-            infer_time = time.time() - mld_time
-            num_batch = 1
-            num_all_frame = sum(batch["length"])
-            num_ave_frame = sum(batch["length"]) / len(batch["length"])
-
-            # upscaling to compare with other methods
-            # joints = upsample(joints, cfg.DATASET.KIT.FRAME_RATE, cfg.DEMO.FRAME_RATE)
-            nsample = len(joints)
-            id = 0
-            for i in range(nsample):
-                npypath = str(output_dir /
-                              f"{task}_{length[i]}_batch{id}_{i}.npy")
-                with open(npypath.replace(".npy", ".txt"), "w") as text_file:
-                    text_file.write(batch["text"][i])
-                np.save(npypath, joints[i].detach().cpu().numpy())
-                logger.info(f"Motions are generated here:\n{npypath}")
+                # upscaling to compare with other methods
+                # joints = upsample(joints, cfg.DATASET.KIT.FRAME_RATE, cfg.DEMO.FRAME_RATE)
+                nsample = len(joints)
+                id = 0
+                for i in range(nsample):
+                    npypath = str(output_dir /
+                                f"{task}_{length[i]}_batch{id}_{i}.npy")
+                    with open(npypath.replace(".npy", ".txt"), "w") as text_file:
+                        text_file.write(batch["text"][i])
+                    np.save(npypath, joints[i].detach().cpu().numpy())
+                    logger.info(f"Motions are generated here:\n{npypath}")
+                
+                if cfg.DEMO.OUTALL:
+                    rep_lst.append(joints)
+                    texts_lst.append(batch["text"])
+                    
+                    
+            if cfg.DEMO.OUTALL:
+                grouped_lst = []
+                for n in range(nsample):
+                    grouped_lst.append(torch.cat([r[n][None] for r in rep_lst], dim=0)[None]) 
+                combinedOut = torch.cat(grouped_lst, dim=0)
+                try:
+                    # save all motions
+                    npypath = str(output_dir / f"{task}_{length[i]}_all.npy")
+                    
+                    np.save(npypath,combinedOut.detach().cpu().numpy())
+                    with open(npypath.replace('npy','txt'),"w") as text_file: 
+                        for texts in texts_lst:
+                            for text in texts:
+                                text_file.write(text)
+                                text_file.write('\n')
+                    logger.info(f"All reconstructed motions are generated here:\n{npypath}")
+                except:
+                    raise ValueError("Lengths of motions are different, so we cannot save all motions in one file.")
+                    
 
         # random samlping
         if not text:
@@ -223,35 +252,39 @@ def main():
                     logger.info(f"Motions are generated here:\n{npypath}")
 
             elif task in ["reconstrucion", "text_motion"]:
-                for id, batch in enumerate(dataset.test_dataloader()):
-                    if task == "reconstrucion":
-                        # batch = dataset.collate_fn(batch)
-                        batch["motion"] = batch["motion"].to(device)
+                for rep in range(cfg.DEMO.REPLICATION):
+                    logger.info(f"Replication {rep}")
+                    joints_lst = []
+                    ref_lst = []
+                    for id, batch in enumerate(dataset.test_dataloader()):
+                        if task == "reconstrucion":
+                            # batch = dataset.collate_fn(batch)
+                            batch["motion"] = batch["motion"].to(device)
+                            length = batch["length"]
+                            joints, joints_ref = model.recon_from_motion(batch)
+                        elif task == "text_motion":
+                            # del batch["motion"]
+                            batch["motion"] = batch["motion"].to(device)
+                            joints, joints_ref = model(batch, return_ref=True)
+
+                        nsample = len(joints)
                         length = batch["length"]
-                        joints, joints_ref = model.recon_from_motion(batch)
-                    elif task == "text_motion":
-                        # del batch["motion"]
-                        batch["motion"] = batch["motion"].to(device)
-                        joints, joints_ref = model(batch, return_ref=True)
+                        for i in range(nsample):
+                            npypath = str(output_dir /
+                                        f"{task}_{length[i]}_batch{id}_{i}_{rep}.npy")
+                            np.save(npypath, joints[i].detach().cpu().numpy())
+                            # if exps == "text-motion":
+                            np.save(
+                                npypath.replace(".npy", "_ref.npy"),
+                                joints_ref[i].detach().cpu().numpy(),
+                            )
+                            with open(npypath.replace(".npy", ".txt"),
+                                    "w") as text_file:
+                                text_file.write(batch["text"][i])
+                            logger.info(
+                                f"Reconstructed motions are generated here:\n{npypath}"
+                            )
 
-                    nsample = len(joints)
-                    length = batch["length"]
-
-                    for i in range(nsample):
-                        npypath = str(output_dir /
-                                      f"{task}_{length[i]}_batch{id}_{i}.npy")
-                        np.save(npypath, joints[i].detach().cpu().numpy())
-                        # if exps == "text-motion":
-                        np.save(
-                            npypath.replace(".npy", "_ref.npy"),
-                            joints_ref[i].detach().cpu().numpy(),
-                        )
-                        with open(npypath.replace(".npy", ".txt"),
-                                  "w") as text_file:
-                            text_file.write(batch["text"][i])
-                        logger.info(
-                            f"Reconstructed motions are generated here:\n{npypath}"
-                        )
             else:
                 raise ValueError(
                     f"Not support task {task}, only support random_sampling, reconstrucion, text_motion"

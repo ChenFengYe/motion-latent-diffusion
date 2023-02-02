@@ -81,6 +81,12 @@ def parse_args(phase="train"):
             help="the frame rate for the input/output motion",
         )
         group.add_argument(
+            "--replication",
+            type=int,
+            default=1,
+            help="the frame rate for the input/output motion",
+        )
+        group.add_argument(
             "--example",
             type=str,
             required=False,
@@ -97,6 +103,12 @@ def parse_args(phase="train"):
             type=str,
             required=False,
             help="output dir",
+        )
+        group.add_argument(
+            "--allinone",
+            action="store_true",
+            required=False,
+            help="output seperate or combined npy file",
         )
 
     if phase == "render":
@@ -172,6 +184,8 @@ def parse_args(phase="train"):
         cfg.DEMO.EXAMPLE = params.example
         cfg.DEMO.TASK = params.task
         cfg.TEST.FOLDER = params.out_dir if params.dir else cfg.TEST.FOLDER
+        cfg.DEMO.REPLICATION = params.replication
+        cfg.DEMO.OUTALL = params.allinone
 
     if phase == "render":
         if params.npy:

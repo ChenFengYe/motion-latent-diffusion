@@ -14,6 +14,7 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 </p>
 
 ## 🚩 News
+
 18/Jan/2023 - add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of project configuration
 
 09/Jan/2023 - release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
@@ -85,6 +86,8 @@ Some parameters:
 - `--example=./demo/example.txt`: input file as text prompts
 - `--task=text_motion`: generate from the test set of dataset
 - `--task=random_sampling`: random motion sampling from noise
+- ` --replication`: generate motions for same input texts multiple times
+- `--allinone`: store all generated motions in a single npy file with the shape of `[num_samples, num_ replication, num_frames, num_joints, xyz]`
 
 The outputs:
 
