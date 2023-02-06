@@ -23,14 +23,14 @@ TRAIN:
   # Training dataset name
   DATASETS: ['Humanact12']
   # Number of dataloader workers
-  NUM_WORKERS: 8
+  NUM_WORKERS: 16
   # Size of batches
   BATCH_SIZE: 64
   # Total epochs for training
-  END_EPOCH: 2000
+  END_EPOCH: 99999
 
   RESUME: '' # Resume training from this path
-  PRETRAINED_VAE: '1109_mld_humanact12.ckpt' # vae model path
+  PRETRAINED_VAE: 1109_mld_humanact12.ckpt # vae model path
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate
@@ -117,7 +117,7 @@ model:
 LOGGER:
   SACE_CHECKPOINT_EPOCH: 200
   LOG_EVERY_STEPS: 1
-  VAL_EVERY_STEPS: 200
+  VAL_EVERY_STEPS: 50
   TENSORBOARD: True
   WANDB:
     PROJECT: null

@@ -169,24 +169,12 @@ def main():
                                 map_location="cpu")["state_dict"]
         # extract encoder/decoder
         from collections import OrderedDict
-        if vae_type in ['actor']:
-            encoder_dict, decoder_dict = OrderedDict(), OrderedDict()
-            for k, v in state_dict.items():
-                if k.split(".")[0] == "motion_encoder":
-                    name = k.replace("motion_encoder.", "")
-                    encoder_dict[name] = v
-                elif k.split(".")[0] == "motion_decoder":
-                    name = k.replace("motion_decoder.", "")
-                    decoder_dict[name] = v
-            model.motion_encoder.load_state_dict(encoder_dict, strict=True)
-            model.motion_decoder.load_state_dict(decoder_dict, strict=True)
-        elif vae_type in ['mld']:
-            vae_dict = OrderedDict()
-            for k, v in state_dict.items():
-                if k.split(".")[0] == "vae":
-                    name = k.replace("vae.", "")
-                    vae_dict[name] = v
-            model.vae.load_state_dict(vae_dict, strict=True)
+        vae_dict = OrderedDict()
+        for k, v in state_dict.items():
+            if k.split(".")[0] == "vae":
+                name = k.replace("vae.", "")
+                vae_dict[name] = v
+        model.vae.load_state_dict(vae_dict, strict=True)
 
     if cfg.TRAIN.PRETRAINED:
         logger.info("Loading pretrain mode from {}".format(

@@ -18,8 +18,7 @@ class ActorVae(nn.Module):
                  num_layers: int = 9,
                  num_heads: int = 4,
                  dropout: float = 0.1,
-                 arch: str = "all_encoder",
-                 normalize_before: bool = False,
+                 is_vae: bool = True,
                  activation: str = "gelu",
                  position_embedding: str = "learned",
                  **kwargs) -> None:
@@ -28,6 +27,7 @@ class ActorVae(nn.Module):
 
         self.latent_size = latent_dim[0]
         self.latent_dim = latent_dim[-1]
+        self.is_vae = is_vae
         input_feats = nfeats
         output_feats = nfeats
 
@@ -68,7 +68,10 @@ class ActorVae(nn.Module):
     ) -> Union[Tensor, Distribution]:
 
         dist = self.encoder(features, lengths)
-        latent = sample_from_distribution(dist)
+        if self.is_vae:
+            latent = sample_from_distribution(dist)
+        else:
+            latent = dist.unsqueeze(0)
 
         return latent, dist
 

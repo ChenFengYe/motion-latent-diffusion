@@ -60,7 +60,7 @@ class MLD(BaseModel):
 
         # Don't train the motion encoder and decoder
         if self.stage == "diffusion":
-            if self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert","actor"]:
                 self.vae.training = False
                 for p in self.vae.parameters():
                     p.requires_grad = False
@@ -232,17 +232,11 @@ class MLD(BaseModel):
             z = self._diffusion_reverse(text_emb, lengths)
         elif self.stage in ['vae']:
             motions = batch['motion']
-            if self.vae_type == "actor":
-                dist_m = self.motion_encoder(motions, lengths)
-                z = self.sample_from_distribution(dist_m)
-            elif self.vae_type == "mld":
-                z, dist_m = self.vae.encode(motions, lengths)
+            z, dist_m = self.vae.encode(motions, lengths)
 
         with torch.no_grad():
             # ToDo change mcross actor to same api
-            if self.vae_type == "actor":
-                feats_rst = self.motion_decoder(z, lengths)
-            elif self.vae_type == "mld":
+            if self.vae_type in ["mld","actor"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
@@ -274,10 +268,7 @@ class MLD(BaseModel):
         z = batch["latent"]
         lengths = batch["length"]
 
-        if self.vae_type == "actor":
-            feats_rst = self.motion_decoder(z, lengths)
-        elif self.vae_type in ["mld", "vposert"]:
-            feats_rst = self.vae.decode(z, lengths)
+        feats_rst = self.vae.decode(z, lengths)
 
         # feats => joints
         joints = self.feats2joints(feats_rst.detach().cpu())
@@ -287,13 +278,8 @@ class MLD(BaseModel):
         feats_ref = batch["motion"]
         length = batch["length"]
 
-        if self.vae_type == "actor":
-            dist = self.motion_encoder(feats_ref, length)
-            z = self.sample_from_distribution(dist)
-            feats_rst = self.motion_decoder(z, length)
-        elif self.vae_type in ["mld", "vposert"]:
-            z, dist = self.vae.encode(feats_ref, length)
-            feats_rst = self.vae.decode(z, length)
+        z, dist = self.vae.encode(feats_ref, length)
+        feats_rst = self.vae.decode(z, length)
 
         # feats => joints
         joints = self.feats2joints(feats_rst.detach().cpu())
@@ -427,29 +413,14 @@ class MLD(BaseModel):
         feats_ref = batch["motion"]
         lengths = batch["length"]
 
-        if self.vae_type == "actor":
-            dist_m = self.motion_encoder(feats_ref, lengths)
-            if self.is_vae:
-                motion_z = self.sample_from_distribution(dist_m)
-            else:
-                motion_z = dist_m.unsqueeze(0)
-            feats_rst = self.motion_decoder(motion_z, lengths)
-        elif self.vae_type in ["mld", "vposert"]:
+        if self.vae_type in ["mld", "vposert"]:
             motion_z, dist_m = self.vae.encode(feats_ref, lengths)
             feats_rst = self.vae.decode(motion_z, lengths)
         else:
             raise TypeError("vae_type must be mcross or actor")
 
         # prepare for metric
-        if self.vae_type == "actor":
-            dist_rm = self.motion_encoder(feats_rst, lengths)
-            if self.is_vae:
-                recons_z = self.sample_from_distribution(dist_rm)
-            else:
-                recons_z = dist_rm.unsqueeze(0)
-            # recons_z = self.sample_from_distribution(dist_rm)
-        elif self.vae_type in ["mld", "vposert"]:
-            recons_z, dist_rm = self.vae.encode(feats_rst, lengths)
+        recons_z, dist_rm = self.vae.encode(feats_rst, lengths)
 
         # joints recover
         if self.condition == "text":
@@ -489,14 +460,7 @@ class MLD(BaseModel):
         lengths = batch["length"]
         # motion encode
         with torch.no_grad():
-            if self.vae_type == "actor":
-                dist = self.motion_encoder(feats_ref, lengths)
-                # dist = self.motion_encoder(feats_ref)
-                if self.is_vae:
-                    z = self.sample_from_distribution(dist)
-                else:
-                    z = dist.unsqueeze(0)
-            elif self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 z, dist = self.vae.encode(feats_ref, lengths)
             elif self.vae_type == "no":
                 z = feats_ref.permute(1, 0, 2)
@@ -552,9 +516,7 @@ class MLD(BaseModel):
             z = self._diffusion_reverse(cond_emb, lengths)
 
         with torch.no_grad():
-            if self.vae_type in ["actor", "mld"]:
-                feats_rst = self.motion_decoder(z, lengths)
-            elif self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
@@ -574,12 +536,7 @@ class MLD(BaseModel):
         if "motion" in batch.keys() and not finetune_decoder:
             feats_ref = batch["motion"].detach()
             with torch.no_grad():
-                if self.vae_type == "actor":
-                    dist_m = self.motion_encoder(feats_ref, lengths)
-                    motion_z = self.sample_from_distribution(dist_m)
-                    dist_rm = self.motion_encoder(feats_rst, lengths)
-                    recons_z = self.sample_from_distribution(dist_rm)
-                elif self.vae_type in ["mld", "vposert"]:
+                if self.vae_type in ["mld", "vposert"]:
                     motion_z, dist_m = self.vae.encode(feats_ref, lengths)
                     recons_z, dist_rm = self.vae.encode(feats_rst, lengths)
                 elif self.vae_type == "no":
@@ -629,14 +586,7 @@ class MLD(BaseModel):
             text_emb = self.text_encoder(texts)
             z = self._diffusion_reverse(text_emb, lengths)
         elif self.stage in ['vae']:
-            if self.vae_type == "actor":
-                dist_m = self.motion_encoder(motions, lengths)
-                if self.is_vae:
-                    z = self.sample_from_distribution(dist_m)
-                else:
-                    z = dist_m.unsqueeze(0)
-
-            elif self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 z, dist_m = self.vae.encode(motions, lengths)
             else:
                 raise TypeError("Not supported vae type!")
@@ -645,9 +595,7 @@ class MLD(BaseModel):
                 z = torch.randn_like(z)
 
         with torch.no_grad():
-            if self.vae_type == "actor":
-                feats_rst = self.motion_decoder(z, lengths)
-            elif self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
@@ -707,18 +655,13 @@ class MLD(BaseModel):
         if self.stage in ['diffusion', 'vae_diffusion']:
             z = self._diffusion_reverse(cond_emb, lengths)
         elif self.stage in ['vae']:
-            if self.vae_type == "actor":
-                dist_m = self.motion_encoder(motions, lengths)
-                z = self.sample_from_distribution(dist_m)
-            elif self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert","actor"]:
                 z, dist_m = self.vae.encode(motions, lengths)
             else:
                 raise TypeError("vae_type must be mcross or actor")
 
         with torch.no_grad():
-            if self.vae_type == "actor":
-                feats_rst = self.motion_decoder(z, lengths)
-            elif self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert","actor"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
