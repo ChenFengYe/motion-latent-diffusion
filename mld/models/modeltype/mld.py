@@ -413,7 +413,7 @@ class MLD(BaseModel):
         feats_ref = batch["motion"]
         lengths = batch["length"]
 
-        if self.vae_type in ["mld", "vposert"]:
+        if self.vae_type in ["mld", "vposert", "actor"]:
             motion_z, dist_m = self.vae.encode(feats_ref, lengths)
             feats_rst = self.vae.decode(motion_z, lengths)
         else:

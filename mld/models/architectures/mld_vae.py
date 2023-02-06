@@ -174,8 +174,8 @@ class MldVae(nn.Module):
             mu = tokens_dist[:, :, :self.latent_dim]
             logvar = tokens_dist[:, :, self.latent_dim:]
         else:
-            mu = dist[0:1, ...]
-            logvar = dist[1:2, ...]
+            mu = dist[0:self.latent_size, ...]
+            logvar = dist[self.latent_size:, ...]
 
         # resampling
         std = logvar.exp().pow(0.5)
