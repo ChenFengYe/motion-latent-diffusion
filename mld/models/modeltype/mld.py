@@ -516,7 +516,7 @@ class MLD(BaseModel):
             z = self._diffusion_reverse(cond_emb, lengths)
 
         with torch.no_grad():
-            if self.vae_type in ["mld", "vposert"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
@@ -536,7 +536,7 @@ class MLD(BaseModel):
         if "motion" in batch.keys() and not finetune_decoder:
             feats_ref = batch["motion"].detach()
             with torch.no_grad():
-                if self.vae_type in ["mld", "vposert"]:
+                if self.vae_type in ["mld", "vposert", "actor"]:
                     motion_z, dist_m = self.vae.encode(feats_ref, lengths)
                     recons_z, dist_rm = self.vae.encode(feats_rst, lengths)
                 elif self.vae_type == "no":
