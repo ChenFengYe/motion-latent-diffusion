@@ -17,7 +17,7 @@ def variance(x, T, dim):
 
 
 def sqrtm(input):
-    m = input.detach().cpu().numpy().astype(np.float_)
+    m = input.detach().cpu().numpy().astype(np.float64_)
     sqrtm = torch.from_numpy(scipy.linalg.sqrtm(m)).to(input)
     return sqrtm
 
