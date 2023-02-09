@@ -200,6 +200,12 @@ https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5
 7. **FID.** FID of validation will drop to 0.5~1 after 1500 epochs for both VAE and MLD training. By default, validation is on test split...https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L30
 </details>
 
+<details>
+  <summary><b>Details of motion lengths</b></summary>
+Our model is capable of generating motions with arbitrary lengths. To handle different lengths of motions in the same batch, padding and masking are utilized in our motion encoder and decoder. After latent vector <i>z</i> is obtained by diffusion process, motion length <i>L</i> represented as a sequence of positional encodings in the form of sinusoidal functions are also provided to the motion decoder, so our motion decoder is able to generate output with variable target lengths.
+
+</details>
+
 **[Details of configuration](./configs)**
 
 ## Citation
