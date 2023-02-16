@@ -27,6 +27,9 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 
 ## ⚡ Quick Start
 
+<details>
+  <summary><b>Setup and download</b></summary>
+  
 ### 1. Conda environment
 
 ```
@@ -68,6 +71,7 @@ bash prepare/download_pretrained_models.sh
 ### 4. (Optional) Download manually
 
 Visit [the Google Driver](https://drive.google.com/drive/folders/1U93wvPsqaSzb5waZfGFVYc4tLCAOmB4C) to download the previous dependencies and model.
+</details>
 
 ## ▶️ Demo
 
@@ -100,7 +104,7 @@ The outputs:
 ## 💻 Train your own models
 
 <details>
-  <summary><b>WIP</b></summary>
+  <summary><b>Training guidance</b></summary>
 
 ### 1. Prepare the datasets
 
@@ -142,9 +146,9 @@ python -m test --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/asse
 ## 👀 Visualization
 
 <details>
-  <summary><b>Details for Rendering</b></summary>
+  <summary><b>Render SMPL</b></summary>
 
-### 1. Setup blender - WIP
+### 1. Set up blender - WIP
 
 Refer to [TEMOS-Rendering motions](https://github.com/Mathux/TEMOS) for blender setup, then install the following dependencies.
 
@@ -204,6 +208,11 @@ https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5
   <summary><b>Details of motion lengths</b></summary>
 Our model is capable of generating motions with arbitrary lengths. To handle different lengths of motions in the same batch, padding and masking are utilized in our motion encoder and decoder. After latent vector <i>z</i> is obtained by diffusion process, motion length <i>L</i> represented as a sequence of positional encodings in the form of sinusoidal functions are also provided to the motion decoder, so our motion decoder is able to generate output with variable target lengths.
 
+</details>
+
+<details>
+  <summary><b>MLD-1 VS MLD-7</b></summary>
+MLD-7 only works best in evaluating VAE models (Tab. 4), and MLD-1 wins these generation tasks (Tab. 1, 2, 3, 6). In other words, MLD-7 wins the first training stage for the VAE part, while MLD-1 wins the second for the diffusion part. We thought MLD-7 should perform better than MLD-1 in several tasks, but the results differ. The main reason for this downgrade of a larger latent size, we believe, is the small amount of training data. HumanML3D only includes 15k motion sequences, much smaller than billions of images in image generation. MLD-7 could work better when the motion data amount reaches the million level.
 </details>
 
 **[Details of configuration](./configs)**
