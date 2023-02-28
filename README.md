@@ -4,8 +4,7 @@
 ![Pytorch_lighting](https://img.shields.io/badge/Pytorch_lighting->=1.7-Blue?logo=Pytorch) ![Diffusers](https://img.shields.io/badge/Diffusers->=0.7.2-Red?logo=diffusers)
 
 ### [Executing your Commands via Motion Diffusion in Latent Space](https://chenxin.tech/mld)
-
-### [Project Page](https://chenxin.tech/mld) | [Arxiv](https://arxiv.org/abs/2212.04048)
+### [Project Page](https://chenxin.tech/mld) | [Arxiv](https://arxiv.org/abs/2212.04048) - CVPR 2023
 
 Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** diffusion model. Our work achieves **state-of-the-art** motion quality and two orders of magnitude **faster** than previous diffusion models on raw motion data.
 
@@ -14,16 +13,12 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 </p>
 
 ## 🚩 News
-
-02/Feb/2023 - release action-to-motion task, please refer to [the config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_mld_humanact12.yaml) and [the pre-train model](https://drive.google.com/file/d/1G9O5arldtHvB66OPr31oE_rJG1bH_R39/view)
-
-18/Jan/2023 - add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of the configuration
-
-09/Jan/2023 - release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
-
-22/Dec/2022 - first release, demo, and training for text-to-motion
-
-08/Dec/2022 - upload paper and init project, code will be released in two weeks
+- [2023/02/28] MLD got accepted by CVPR 2023!
+- [2023/02/02] release action-to-motion task, please refer to [the config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_mld_humanact12.yaml) and [the pre-train model](https://drive.google.com/file/d/1G9O5arldtHvB66OPr31oE_rJG1bH_R39/view)
+- [2023/01/18] add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of the configuration
+- [2023/01/09] release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
+- [2022/12/22] first release, demo, and training for text-to-motion
+- [2022/12/08] upload paper and init project, code will be released in two weeks
 
 ## ⚡ Quick Start
 
@@ -221,12 +216,13 @@ MLD-7 only works best in evaluating VAE models (Tab. 4), and MLD-1 wins these ge
 
 If you find our code or paper helps, please consider citing:
 
-```
-@article{chen2022mld,
-  author = {Xin, Chen and Jiang, Biao and Liu, Wen and Huang, Zilong and Fu, Bin and Chen, Tao and Yu, Jingyi and Yu, Gang},
-  title = {Executing your Commands via Motion Diffusion in Latent Space},
-  journal = {arXiv},
-  year = {2022},
+```bibtex
+@inproceedings{chen2023mld,
+  title     = {Executing your Commands via Motion Diffusion in Latent Space},
+  author    = {Xin, Chen and Jiang, Biao and Liu, Wen and Huang, Zilong and Fu, Bin and Chen, Tao and Yu, Jingyi and Yu, Gang},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  month     = {June},
+  year      = {2023},
 }
 ```
 
