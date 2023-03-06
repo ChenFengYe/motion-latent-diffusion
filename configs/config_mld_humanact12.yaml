@@ -3,7 +3,7 @@
 ####################################
 
 # Experiment name, more details in Section 'Experiment Name Explanation'
-NAME: 0129_Humanact12_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01
+NAME: 0213_Humanact12_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01
 # Debug mode. Set to True will enter the debug mode, then the program will
 # 1. use a tiny dataset for trianing and evaluation
 # 2. validate more intensively
@@ -52,7 +52,7 @@ EVAL:
 # The following are testing settings
 #####################################
 TEST:
-  CHECKPOINTS: 1109_mld_humanact12.ckpt # Pretrained model path
+  CHECKPOINTS: experiments/mld/0129_Humanact12_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01/checkpoints/epoch=29999.ckpt # Pretrained model path
   DATASETS: ['Humanact12'] # training datasets
   SPLIT: train
   BATCH_SIZE: 32 # training Batch size
