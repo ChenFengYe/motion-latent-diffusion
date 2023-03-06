@@ -3,7 +3,8 @@
 mkdir -p deps/actionrecognition/
 cd deps/actionrecognition/
 
-echo -e "The action recognition models will be stored in the 'models/actionrecognition/' folder\n"
+echo -e "The action recognition models will be stored in the 'models/actionrecognition
+/' folder\n"
 
 # NTU13 action recognition models
 echo -e "Downloading the HumanAct12 action recognition model"

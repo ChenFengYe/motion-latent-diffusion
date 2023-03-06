@@ -115,19 +115,19 @@ def main():
     params_lst = []
     flops_lst = []
     for (i, batch) in enumerate(datasets.test_dataloader()):
-      print('batch size', len(batch['text']))
-      macs, params = profile(model, (batch,))
-      # flops = FlopCountAnalysis(model, batch).total()
-      # print(flops)
-      # flops_lst.append(flops)
-      print('macs', macs/1e9)
-      print('flops', macs*2/1e9)
-      return
-      macs_lst.append(macs)
-      params_lst.append(params)
+        print('batch size', len(batch['text']))
+        macs, params = profile(model, (batch,))
+        # flops = FlopCountAnalysis(model, batch).total()
+        # print(flops)
+        # flops_lst.append(flops)
+        print('macs', macs/1e9)
+        print('flops', macs*2/1e9)
+        return
+        macs_lst.append(macs)
+        params_lst.append(params)
 
-      if len(flops_lst) == 1:
-        break
+        if len(flops_lst) == 1:
+            break
     
     print(macs_lst)
     print(params_lst)

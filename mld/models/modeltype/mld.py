@@ -358,6 +358,70 @@ class MLD(BaseModel):
         # [batch_size, 1, latent_dim] -> [1, batch_size, latent_dim]
         latents = latents.permute(1, 0, 2)
         return latents
+    
+    def _diffusion_reverse_tsne(self, encoder_hidden_states, lengths=None):
+        # init latents
+        bsz = encoder_hidden_states.shape[0]
+        if self.do_classifier_free_guidance:
+            bsz = bsz // 2
+        if self.vae_type == "no":
+            assert lengths is not None, "no vae (diffusion only) need lengths for diffusion"
+            latents = torch.randn(
+                (bsz, max(lengths), self.cfg.DATASET.NFEATS),
+                device=encoder_hidden_states.device,
+                dtype=torch.float,
+            )
+        else:
+            latents = torch.randn(
+                (bsz, self.latent_dim[0], self.latent_dim[-1]),
+                device=encoder_hidden_states.device,
+                dtype=torch.float,
+            )
+
+        # scale the initial noise by the standard deviation required by the scheduler
+        latents = latents * self.scheduler.init_noise_sigma
+        # set timesteps
+        self.scheduler.set_timesteps(
+            self.cfg.model.scheduler.num_inference_timesteps)
+        timesteps = self.scheduler.timesteps.to(encoder_hidden_states.device)
+        # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
+        # eta (η) is only used with the DDIMScheduler, and between [0, 1]
+        extra_step_kwargs = {}
+        if "eta" in set(
+                inspect.signature(self.scheduler.step).parameters.keys()):
+            extra_step_kwargs["eta"] = self.cfg.model.scheduler.eta
+
+        # reverse
+        latents_t = []
+        for i, t in enumerate(timesteps):
+            # expand the latents if we are doing classifier free guidance
+            latent_model_input = (torch.cat(
+                [latents] *
+                2) if self.do_classifier_free_guidance else latents)
+            lengths_reverse = (lengths * 2 if self.do_classifier_free_guidance
+                               else lengths)
+            # latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
+            # predict the noise residual
+            noise_pred = self.denoiser(
+                sample=latent_model_input,
+                timestep=t,
+                encoder_hidden_states=encoder_hidden_states,
+                lengths=lengths_reverse,
+            )[0]
+            # perform guidance
+            if self.do_classifier_free_guidance:
+                noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+                noise_pred = noise_pred_uncond + self.guidance_scale * (
+                    noise_pred_text - noise_pred_uncond)
+                # text_embeddings_for_guidance = encoder_hidden_states.chunk(
+                #     2)[1] if self.do_classifier_free_guidance else encoder_hidden_states
+            latents = self.scheduler.step(noise_pred, t, latents,
+                                              **extra_step_kwargs).prev_sample
+            # [batch_size, 1, latent_dim] -> [1, batch_size, latent_dim]
+            latents_t.append(latents.permute(1,0,2))
+        # [1, batch_size, latent_dim] -> [t, batch_size, latent_dim]
+        latents_t = torch.cat(latents_t)
+        return latents_t
 
     def _diffusion_process(self, latents, encoder_hidden_states, lengths=None):
         """
