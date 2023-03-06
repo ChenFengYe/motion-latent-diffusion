@@ -120,8 +120,7 @@ def main():
         # flops = FlopCountAnalysis(model, batch).total()
         # print(flops)
         # flops_lst.append(flops)
-        print('macs', macs/1e9)
-        print('flops', macs*2/1e9)
+        print('macs', macs/1e9, 'G')
         return
         macs_lst.append(macs)
         params_lst.append(params)
