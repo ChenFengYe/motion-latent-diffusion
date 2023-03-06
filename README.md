@@ -4,8 +4,7 @@
 ![Pytorch_lighting](https://img.shields.io/badge/Pytorch_lighting->=1.7-Blue?logo=Pytorch) ![Diffusers](https://img.shields.io/badge/Diffusers->=0.7.2-Red?logo=diffusers)
 
 ### [Executing your Commands via Motion Diffusion in Latent Space](https://chenxin.tech/mld)
-
-### [Project Page](https://chenxin.tech/mld) | [Arxiv](https://arxiv.org/abs/2212.04048)
+### [Project Page](https://chenxin.tech/mld) | [Arxiv](https://arxiv.org/abs/2212.04048) - CVPR 2023
 
 Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** diffusion model. Our work achieves **state-of-the-art** motion quality and two orders of magnitude **faster** than previous diffusion models on raw motion data.
 
@@ -14,19 +13,18 @@ Motion Latent Diffusion (MLD) is a **text-to-motion** and **action-to-motion** d
 </p>
 
 ## 🚩 News
-
-02/Feb/2023 - release action-to-motion task, please refer to [the config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_mld_humanact12.yaml) and [the pre-train model](https://drive.google.com/file/d/1G9O5arldtHvB66OPr31oE_rJG1bH_R39/view)
-
-18/Jan/2023 - add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of the configuration
-
-09/Jan/2023 - release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
-
-22/Dec/2022 - first release, demo, and training for text-to-motion
-
-08/Dec/2022 - upload paper and init project, code will be released in two weeks
+- [2023/02/28] MLD got accepted by CVPR 2023!
+- [2023/02/02] release action-to-motion task, please refer to [the config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_mld_humanact12.yaml) and [the pre-train model](https://drive.google.com/file/d/1G9O5arldtHvB66OPr31oE_rJG1bH_R39/view)
+- [2023/01/18] add a detailed [readme](https://github.com/ChenFengYe/motion-latent-diffusion/tree/main/configs) of the configuration
+- [2023/01/09] release [no VAE config](https://github.com/ChenFengYe/motion-latent-diffusion/blob/main/configs/config_novae_humanml3d.yaml) and [pre-train model](https://drive.google.com/file/d/1_mgZRWVQ3jwU43tLZzBJdZ28gvxhMm23/view), you can use MLD framework to train diffusion on raw motion like [MDM](https://github.com/GuyTevet/motion-diffusion-model).
+- [2022/12/22] first release, demo, and training for text-to-motion
+- [2022/12/08] upload paper and init project, code will be released in two weeks
 
 ## ⚡ Quick Start
 
+<details>
+  <summary><b>Setup and download</b></summary>
+  
 ### 1. Conda environment
 
 ```
@@ -68,6 +66,7 @@ bash prepare/download_pretrained_models.sh
 ### 4. (Optional) Download manually
 
 Visit [the Google Driver](https://drive.google.com/drive/folders/1U93wvPsqaSzb5waZfGFVYc4tLCAOmB4C) to download the previous dependencies and model.
+</details>
 
 ## ▶️ Demo
 
@@ -100,7 +99,7 @@ The outputs:
 ## 💻 Train your own models
 
 <details>
-  <summary><b>WIP</b></summary>
+  <summary><b>Training guidance</b></summary>
 
 ### 1. Prepare the datasets
 
@@ -142,9 +141,9 @@ python -m test --cfg configs/config_mld_humanml3d.yaml --cfg_assets configs/asse
 ## 👀 Visualization
 
 <details>
-  <summary><b>Details for Rendering</b></summary>
+  <summary><b>Render SMPL</b></summary>
 
-### 1. Setup blender - WIP
+### 1. Set up blender - WIP
 
 Refer to [TEMOS-Rendering motions](https://github.com/Mathux/TEMOS) for blender setup, then install the following dependencies.
 
@@ -206,18 +205,24 @@ Our model is capable of generating motions with arbitrary lengths. To handle dif
 
 </details>
 
+<details>
+  <summary><b>MLD-1 VS MLD-7</b></summary>
+MLD-7 only works best in evaluating VAE models (Tab. 4), and MLD-1 wins these generation tasks (Tab. 1, 2, 3, 6). In other words, MLD-7 wins the first training stage for the VAE part, while MLD-1 wins the second for the diffusion part. We thought MLD-7 should perform better than MLD-1 in several tasks, but the results differ. The main reason for this downgrade of a larger latent size, we believe, is the small amount of training data. HumanML3D only includes 15k motion sequences, much smaller than billions of images in image generation. MLD-7 could work better when the motion data amount reaches the million level.
+</details>
+
 **[Details of configuration](./configs)**
 
 ## Citation
 
 If you find our code or paper helps, please consider citing:
 
-```
-@article{chen2022mld,
-  author = {Xin, Chen and Jiang, Biao and Liu, Wen and Huang, Zilong and Fu, Bin and Chen, Tao and Yu, Jingyi and Yu, Gang},
-  title = {Executing your Commands via Motion Diffusion in Latent Space},
-  journal = {arXiv},
-  year = {2022},
+```bibtex
+@inproceedings{chen2023mld,
+  title     = {Executing your Commands via Motion Diffusion in Latent Space},
+  author    = {Xin, Chen and Jiang, Biao and Liu, Wen and Huang, Zilong and Fu, Bin and Chen, Tao and Yu, Jingyi and Yu, Gang},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  month     = {June},
+  year      = {2023},
 }
 ```
 
