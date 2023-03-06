@@ -219,12 +219,26 @@ MLD-7 only works best in evaluating VAE models (Tab. 4), and MLD-1 wins these ge
   <summary><b>Details of Inference Time</b></summary>
 We provide a detailed ablation study with DDIM below. We evaluate the total inference time to generate 2048 motion clips with different diffusion schedules, floating point operations (FLOPs) counted by THOP library, the size of diffusion input, and FID. MLD reduces the computational cost of diffusion models, which is the main reason for faster inference. The iterations of diffusion further widen the gap in computational cost.
 <img width="839" alt="image" src="https://user-images.githubusercontent.com/24362526/223096066-79ff5879-d685-4ab9-b85e-9b55613df17b.png">
+If you want to test the floating point operations (FLOPs) in your model setting, you can run the following command:
+
+```
+python -m scripts.flops --cfg configs/your_config.yaml
+```
+
 </details>
 
 <details>
   <summary><b>Latent Space Visualization</b></summary>
 We provide Visualization of the t-SNE results on evolved latent codes <i>z</i><sup>t</sup> during the reverse diffusion process (inference) on action-to-motion task below. <i>t</i> is the diffusion step but ordered in the forward diffusion trajectory. <i>z</i><sup>t</sup>=49 is the initial random noise. <i>z</i><sup>t</sup>=0 is our prediction. We sample 30 motions for each action label. From left to right, it shows the evolved latent codes during the inference of diffusion models.
 <img width="1110" alt="image" src="https://user-images.githubusercontent.com/24362526/223096486-20c497f2-6f75-43af-a892-9e1215954ca4.png">
+If you want to visualize Latent Space in your model setting, you can run the following command:
+
+```
+python -m scripts.tsne --cfg configs/your_config.yaml
+```
+
+**Note**: This only support action-to-motion models for now.
+
 </details>
 
 **[Details of configuration](./configs)**
