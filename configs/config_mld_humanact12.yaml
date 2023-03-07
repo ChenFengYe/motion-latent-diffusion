@@ -30,15 +30,15 @@ TRAIN:
   END_EPOCH: 99999
 
   RESUME: '' # Resume training from this path
-  PRETRAINED_VAE: 1109_mld_humanact12.ckpt # vae model path
+  PRETRAINED_VAE: checkpoints/1109_mld_humanact12.ckpt # vae model path
   OPTIM:
     TYPE: AdamW # Optimizer type
     LR: 1e-4 # Learning rate
   # Ablation study configurations.
   ABLATION:
     SKIP_CONNECT: True
-    PE_TYPE: actor
-    DIFF_PE_TYPE: actor
+    PE_TYPE: mld
+    DIFF_PE_TYPE: mld
 
 #####################################
 # The following are validation settings
@@ -52,7 +52,7 @@ EVAL:
 # The following are testing settings
 #####################################
 TEST:
-  CHECKPOINTS: experiments/mld/0129_Humanact12_Diff_Latent1_MEncDec49_MdiffEnc49_bs64_clip_uncond75_01/checkpoints/epoch=29999.ckpt # Pretrained model path
+  CHECKPOINTS: checkpoints/1109_mld_humanact12.ckpt # Pretrained model path
   DATASETS: ['Humanact12'] # training datasets
   SPLIT: train
   BATCH_SIZE: 32 # training Batch size
