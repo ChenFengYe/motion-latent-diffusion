@@ -102,6 +102,7 @@ class MLDLosses(Metric):
                                        rs_set['m_ref'])
             total += self._update_loss("recons_joints", rs_set['joints_rst'],
                                        rs_set['joints_ref'])
+            total += self._update_loss("kl_motion", rs_set['dist_m'], rs_set['dist_ref'])
 
         if self.stage in ["diffusion", "vae_diffusion"]:
             # predict noise

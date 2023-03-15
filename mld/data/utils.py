@@ -68,7 +68,7 @@ def mld_collate(batch):
         "pos_ohot":
         collate_tensors([torch.tensor(b[1]).float() for b in notnone_batches]),
         "text_len":
-        collate_tensors([torch.tensor(b[3]).float() for b in notnone_batches]),
+        collate_tensors([torch.tensor(b[3]) for b in notnone_batches]),
         "tokens": [b[6] for b in notnone_batches],
     }
     return adapted_batch
