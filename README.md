@@ -191,6 +191,14 @@ optional parameters:
 ## ❓ FAQ
 
 <details>
+    <summary><b>Solve foot sliding issue</b></summary>
+  
+ If your demo results have a severe issue on foot sliding, please take a look to the below. It could happen when ``self.feats2joints`` (use mean and std for de-normalization) is broken. 
+ https://github.com/ChenFengYe/motion-latent-diffusion/blob/af507c479d771f62a058b5b6abb51276b36d6c6d/mld/models/modeltype/mld.py#L264
+ 
+</details>
+
+<details>
   <summary><b>Details of training</b></summary>
   
 1. **GPUs.** You can indicate the IDs to use all your GPUs.  https://github.com/ChenFengYe/motion-latent-diffusion/blob/6643f175fbcd914312fa5f570e3dc7ab57994075/configs/config_vae_humanml3d.yaml#L4
