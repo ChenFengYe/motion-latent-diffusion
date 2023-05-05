@@ -4,7 +4,8 @@ import torch
 def lengths_to_mask(lengths):
     max_len = max(lengths)
     mask = torch.arange(max_len, device=lengths.device).expand(
-        len(lengths), max_len) < lengths.unsqueeze(1)
+        len(lengths), max_len
+    ) < lengths.unsqueeze(1)
     return mask
 
 
@@ -36,8 +37,12 @@ def collate(batch):
     # y - [bs]
     # mask - [bs, lengths]
     # lengths - [bs]
-    batch = {"x": databatchTensor, "y": labelbatchTensor,
-             "mask": maskbatchTensor, 'lengths': lenbatchTensor}
+    batch = {
+        "x": databatchTensor,
+        "y": labelbatchTensor,
+        "mask": maskbatchTensor,
+        "lengths": lenbatchTensor,
+    }
     return batch
 
 
@@ -56,14 +61,15 @@ def collate_data3d_slow(batch):
     # w_3d - [bs, lengths] zeros
     return batch
 
+
 def collate_data3d(batch):
     batchTensor = {}
     for key in batch[0].keys():
         databatch = [b[key] for b in batch]
         if key == "paths":
             batchTensor[key] = databatch
-        else:    
-            batchTensor[key] = torch.stack(databatch,axis=0)
+        else:
+            batchTensor[key] = torch.stack(databatch, axis=0)
     batch = batchTensor
     # theta - [bs, lengths, 85], theta shape (85,)
     #       - (np.array([1., 0., 0.]), pose(72), shape(10)), axis=0)

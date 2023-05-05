@@ -7,13 +7,14 @@ from torch import Tensor
 import mld.utils.geometry as geometry
 
 
-def lengths_to_mask(lengths: List[int],
-                    device: torch.device,
-                    max_len: int = None) -> Tensor:
+def lengths_to_mask(
+    lengths: List[int], device: torch.device, max_len: int = None
+) -> Tensor:
     lengths = torch.tensor(lengths, device=device)
     max_len = max_len if max_len else max(lengths)
     mask = torch.arange(max_len, device=device).expand(
-        len(lengths), max_len) < lengths.unsqueeze(1)
+        len(lengths), max_len
+    ) < lengths.unsqueeze(1)
     return mask
 
 
@@ -22,10 +23,7 @@ def detach_to_numpy(tensor):
 
 
 def remove_padding(tensors, lengths):
-    return [
-        tensor[:tensor_length]
-        for tensor, tensor_length in zip(tensors, lengths)
-    ]
+    return [tensor[:tensor_length] for tensor, tensor_length in zip(tensors, lengths)]
 
 
 def nfeats_of(rottype):

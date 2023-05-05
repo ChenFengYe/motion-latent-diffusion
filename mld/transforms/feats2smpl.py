@@ -26,13 +26,13 @@ skeleton = paramUtil.t2m_kinematic_chain
 
 
 def main():
-    data_root = '../datasets/humanml3d'
-    feastures_path = 'in.npy'
-    animation_save_path = 'in.mp4'
+    data_root = "../datasets/humanml3d"
+    feastures_path = "in.npy"
+    animation_save_path = "in.mp4"
 
     fps = 20
-    mean = np.load(pjoin(data_root, 'Mean.npy'))
-    std = np.load(pjoin(data_root, 'Std.npy'))
+    mean = np.load(pjoin(data_root, "Mean.npy"))
+    std = np.load(pjoin(data_root, "Std.npy"))
 
     motion = np.load(feastures_path)
     motion = motion * std + mean
@@ -40,8 +40,8 @@ def main():
     # with open('in_22.npy', 'wb') as f:
     #     np.save(f,motion_rec)
     motion_rec = motion_rec * 1.3
-    plot_3d_motion(animation_save_path, motion_rec, title='input', fps=fps)
+    plot_3d_motion(animation_save_path, motion_rec, title="input", fps=fps)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

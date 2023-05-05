@@ -9,20 +9,20 @@ from mld.models.operator import PositionalEncoding
 
 
 class ActorVae(nn.Module):
-
-    def __init__(self,
-                 ablation,
-                 nfeats: int,
-                 latent_dim: list = [1, 256],
-                 ff_size: int = 1024,
-                 num_layers: int = 9,
-                 num_heads: int = 4,
-                 dropout: float = 0.1,
-                 is_vae: bool = True,
-                 activation: str = "gelu",
-                 position_embedding: str = "learned",
-                 **kwargs) -> None:
-
+    def __init__(
+        self,
+        ablation,
+        nfeats: int,
+        latent_dim: list = [1, 256],
+        ff_size: int = 1024,
+        num_layers: int = 9,
+        num_heads: int = 4,
+        dropout: float = 0.1,
+        is_vae: bool = True,
+        activation: str = "gelu",
+        position_embedding: str = "learned",
+        **kwargs,
+    ) -> None:
         super().__init__()
 
         self.latent_size = latent_dim[0]
@@ -31,25 +31,29 @@ class ActorVae(nn.Module):
         input_feats = nfeats
         output_feats = nfeats
 
-        self.encoder = ActorAgnosticEncoder(nfeats=input_feats,
-                                            vae=True,
-                                            latent_dim=self.latent_dim,
-                                            ff_size=ff_size,
-                                            num_layers=num_layers,
-                                            num_heads=num_heads,
-                                            dropout=dropout,
-                                            activation=activation,
-                                            **kwargs)
+        self.encoder = ActorAgnosticEncoder(
+            nfeats=input_feats,
+            vae=True,
+            latent_dim=self.latent_dim,
+            ff_size=ff_size,
+            num_layers=num_layers,
+            num_heads=num_heads,
+            dropout=dropout,
+            activation=activation,
+            **kwargs,
+        )
 
-        self.decoder = ActorAgnosticDecoder(nfeats=output_feats,
-                                            vae=True,
-                                            latent_dim=self.latent_dim,
-                                            ff_size=ff_size,
-                                            num_layers=num_layers,
-                                            num_heads=num_heads,
-                                            dropout=dropout,
-                                            activation=activation,
-                                            **kwargs)
+        self.decoder = ActorAgnosticDecoder(
+            nfeats=output_feats,
+            vae=True,
+            latent_dim=self.latent_dim,
+            ff_size=ff_size,
+            num_layers=num_layers,
+            num_heads=num_heads,
+            dropout=dropout,
+            activation=activation,
+            **kwargs,
+        )
 
     def forward(self, features: Tensor, lengths: Optional[List[int]] = None):
         # Temp
@@ -62,11 +66,8 @@ class ActorVae(nn.Module):
         return feats_rst, z, dist
 
     def encode(
-            self,
-            features: Tensor,
-            lengths: Optional[List[int]] = None
+        self, features: Tensor, lengths: Optional[List[int]] = None
     ) -> Union[Tensor, Distribution]:
-
         dist = self.encoder(features, lengths)
         if self.is_vae:
             latent = sample_from_distribution(dist)
@@ -76,23 +77,23 @@ class ActorVae(nn.Module):
         return latent, dist
 
     def decode(self, z: Tensor, lengths: List[int]):
-
         feats = self.decoder(z, lengths)
         return feats
 
 
 class ActorAgnosticEncoder(nn.Module):
-
-    def __init__(self,
-                 nfeats: int,
-                 vae: bool,
-                 latent_dim: int = 256,
-                 ff_size: int = 1024,
-                 num_layers: int = 4,
-                 num_heads: int = 4,
-                 dropout: float = 0.1,
-                 activation: str = "gelu",
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        nfeats: int,
+        vae: bool,
+        latent_dim: int = 256,
+        ff_size: int = 1024,
+        num_layers: int = 4,
+        num_heads: int = 4,
+        dropout: float = 0.1,
+        activation: str = "gelu",
+        **kwargs,
+    ) -> None:
         super().__init__()
 
         input_feats = nfeats
@@ -113,15 +114,15 @@ class ActorAgnosticEncoder(nn.Module):
             nhead=num_heads,
             dim_feedforward=ff_size,
             dropout=dropout,
-            activation=activation)
+            activation=activation,
+        )
 
-        self.seqTransEncoder = nn.TransformerEncoder(seq_trans_encoder_layer,
-                                                     num_layers=num_layers)
+        self.seqTransEncoder = nn.TransformerEncoder(
+            seq_trans_encoder_layer, num_layers=num_layers
+        )
 
     def forward(
-            self,
-            features: Tensor,
-            lengths: Optional[List[int]] = None
+        self, features: Tensor, lengths: Optional[List[int]] = None
     ) -> Union[Tensor, Distribution]:
         if lengths is None:
             lengths = [len(feature) for feature in features]
@@ -141,9 +142,8 @@ class ActorAgnosticEncoder(nn.Module):
 
         # Each batch has its own set of tokens
         if self.vae:
-            mu_token = torch.tile(self.mu_token, (bs, )).reshape(bs, -1)
-            logvar_token = torch.tile(self.logvar_token,
-                                      (bs, )).reshape(bs, -1)
+            mu_token = torch.tile(self.mu_token, (bs,)).reshape(bs, -1)
+            logvar_token = torch.tile(self.logvar_token, (bs,)).reshape(bs, -1)
 
             # adding the distribution tokens for all sequences
             xseq = torch.cat((mu_token[None], logvar_token[None], x), 0)
@@ -152,7 +152,7 @@ class ActorAgnosticEncoder(nn.Module):
             token_mask = torch.ones((bs, 2), dtype=bool, device=x.device)
             aug_mask = torch.cat((token_mask, mask), 1)
         else:
-            emb_token = torch.tile(self.emb_token, (bs, )).reshape(bs, -1)
+            emb_token = torch.tile(self.emb_token, (bs,)).reshape(bs, -1)
 
             # adding the embedding token for all sequences
             xseq = torch.cat((emb_token[None], x), 0)
@@ -176,16 +176,17 @@ class ActorAgnosticEncoder(nn.Module):
 
 
 class ActorAgnosticDecoder(nn.Module):
-
-    def __init__(self,
-                 nfeats: int,
-                 latent_dim: int = 256,
-                 ff_size: int = 1024,
-                 num_layers: int = 4,
-                 num_heads: int = 4,
-                 dropout: float = 0.1,
-                 activation: str = "gelu",
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        nfeats: int,
+        latent_dim: int = 256,
+        ff_size: int = 1024,
+        num_layers: int = 4,
+        num_heads: int = 4,
+        dropout: float = 0.1,
+        activation: str = "gelu",
+        **kwargs,
+    ) -> None:
         super().__init__()
 
         output_feats = nfeats
@@ -199,10 +200,12 @@ class ActorAgnosticDecoder(nn.Module):
             nhead=num_heads,
             dim_feedforward=ff_size,
             dropout=dropout,
-            activation=activation)
+            activation=activation,
+        )
 
-        self.seqTransDecoder = nn.TransformerDecoder(seq_trans_decoder_layer,
-                                                     num_layers=num_layers)
+        self.seqTransDecoder = nn.TransformerDecoder(
+            seq_trans_decoder_layer, num_layers=num_layers
+        )
 
         self.final_layer = nn.Linear(latent_dim, output_feats)
 
@@ -215,17 +218,14 @@ class ActorAgnosticDecoder(nn.Module):
         # z = z[None]  # sequence of 1 element for the memory
 
         # Construct time queries
-        time_queries = torch.zeros(nframes,
-                                   bs,
-                                   self.latent_dim,
-                                   device=z.device)
+        time_queries = torch.zeros(nframes, bs, self.latent_dim, device=z.device)
         time_queries = self.sequence_pos_encoding(time_queries)
 
         # Pass through the transformer decoder
         # with the latent vector for memory
-        output = self.seqTransDecoder(tgt=time_queries,
-                                      memory=z,
-                                      tgt_key_padding_mask=~mask)
+        output = self.seqTransDecoder(
+            tgt=time_queries, memory=z, tgt_key_padding_mask=~mask
+        )
 
         output = self.final_layer(output)
         # zero for padded area
@@ -241,7 +241,6 @@ def sample_from_distribution(
     fact=1.0,
     sample_mean=False,
 ) -> Tensor:
-
     if sample_mean:
         return dist.loc.unsqueeze(0)
 

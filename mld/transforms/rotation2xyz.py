@@ -3,40 +3,39 @@ import torch
 import mld.utils.rotation_conversions as geometry
 
 from .smpl import SMPL, JOINTSTYPE_ROOT
+
 # from .get_model import JOINTSTYPES
 JOINTSTYPES = ["a2m", "a2mpl", "smpl", "vibe", "vertices"]
 
 
 class Rotation2xyz(torch.nn.Module):
-
     def __init__(self, smpl_path):
         super().__init__()
         self.smpl_model = SMPL(smpl_path).eval()
 
-    def __call__(self,
-                 x,
-                 mask,
-                 pose_rep,
-                 translation,
-                 glob,
-                 jointstype,
-                 vertstrans,
-                 betas=None,
-                 beta=0,
-                 glob_rot=None,
-                 get_rotations_back=False,
-                 **kwargs):
+    def __call__(
+        self,
+        x,
+        mask,
+        pose_rep,
+        translation,
+        glob,
+        jointstype,
+        vertstrans,
+        betas=None,
+        beta=0,
+        glob_rot=None,
+        get_rotations_back=False,
+        **kwargs
+    ):
         if pose_rep == "xyz":
             return x
 
         if mask is None:
-            mask = torch.ones((x.shape[0], x.shape[-1]),
-                              dtype=bool,
-                              device=x.device)
+            mask = torch.ones((x.shape[0], x.shape[-1]), dtype=bool, device=x.device)
 
         if not glob and glob_rot is None:
-            raise TypeError(
-                "You must specify global rotation if glob is False")
+            raise TypeError("You must specify global rotation if glob is False")
 
         if jointstype not in JOINTSTYPES:
             raise NotImplementedError("This jointstype is not implemented.")
@@ -65,7 +64,8 @@ class Rotation2xyz(torch.nn.Module):
         if not glob:
             global_orient = torch.tensor(glob_rot, device=x.device)
             global_orient = geometry.axis_angle_to_matrix(global_orient).view(
-                1, 1, 3, 3)
+                1, 1, 3, 3
+            )
             global_orient = global_orient.repeat(len(rotations), 1, 1, 1)
         else:
             global_orient = rotations[:, 0]
@@ -75,22 +75,20 @@ class Rotation2xyz(torch.nn.Module):
             betas = torch.zeros(
                 [rotations.shape[0], self.smpl_model.num_betas],
                 dtype=rotations.dtype,
-                device=rotations.device)
+                device=rotations.device,
+            )
             betas[:, 1] = beta
             # import ipdb; ipdb.set_trace()
-        out = self.smpl_model(body_pose=rotations,
-                              global_orient=global_orient,
-                              betas=betas)
+        out = self.smpl_model(
+            body_pose=rotations, global_orient=global_orient, betas=betas
+        )
 
         # get the desirable joints
         joints = out[jointstype]
 
-        x_xyz = torch.empty(nsamples,
-                            time,
-                            joints.shape[1],
-                            3,
-                            device=x.device,
-                            dtype=x.dtype)
+        x_xyz = torch.empty(
+            nsamples, time, joints.shape[1], 3, device=x.device, dtype=x.dtype
+        )
         x_xyz[~mask] = 0
         x_xyz[mask] = joints
 

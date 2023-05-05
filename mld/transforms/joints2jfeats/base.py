@@ -6,10 +6,13 @@ from pathlib import Path
 
 
 class Joints2Jfeats(nn.Module):
-    def __init__(self, path: Optional[str] = None,
-                 normalization: bool = False,
-                 eps: float = 1e-12,
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        path: Optional[str] = None,
+        normalization: bool = False,
+        eps: float = 1e-12,
+        **kwargs
+    ) -> None:
         if normalization and path is None:
             raise TypeError("You should provide a path if normalization is on.")
 
@@ -20,12 +23,12 @@ class Joints2Jfeats(nn.Module):
         if normalization:
             mean_path = Path(path) / "jfeats_mean.pt"
             std_path = Path(path) / "jfeats_std.pt"
-            self.register_buffer('mean', torch.load(mean_path))
-            self.register_buffer('std', torch.load(std_path))
+            self.register_buffer("mean", torch.load(mean_path))
+            self.register_buffer("std", torch.load(std_path))
 
     def normalize(self, features: Tensor) -> Tensor:
         if self.normalization:
-            features = (features - self.mean)/(self.std + self.eps)
+            features = (features - self.mean) / (self.std + self.eps)
         return features
 
     def unnormalize(self, features: Tensor) -> Tensor:

@@ -15,14 +15,15 @@ def slice_or_none(data, cslice):
 
 
 class SMPLH(Rots2Joints):
-
-    def __init__(self,
-                 path: str,
-                 jointstype: str = "mmm",
-                 input_pose_rep: str = "matrix",
-                 batch_size: int = 512,
-                 gender="neutral",
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        path: str,
+        jointstype: str = "mmm",
+        input_pose_rep: str = "matrix",
+        batch_size: int = 512,
+        gender="neutral",
+        **kwargs,
+    ) -> None:
         super().__init__(path=None, normalization=False)
         self.batch_size = batch_size
         self.input_pose_rep = input_pose_rep
@@ -42,26 +43,29 @@ class SMPLH(Rots2Joints):
     def train(self, *args, **kwargs):
         return self
 
-    def forward(self,
-                smpl_data: dict,
-                jointstype: Optional[str] = None,
-                input_pose_rep: Optional[str] = None,
-                batch_size: Optional[int] = None) -> Tensor:
-
+    def forward(
+        self,
+        smpl_data: dict,
+        jointstype: Optional[str] = None,
+        input_pose_rep: Optional[str] = None,
+        batch_size: Optional[int] = None,
+    ) -> Tensor:
         # Take values from init if not specified there
         jointstype = self.jointstype if jointstype is None else jointstype
         batch_size = self.batch_size if batch_size is None else batch_size
-        input_pose_rep = self.input_pose_rep if input_pose_rep is None else input_pose_rep
+        input_pose_rep = (
+            self.input_pose_rep if input_pose_rep is None else input_pose_rep
+        )
 
         if input_pose_rep == "xyz":
-            raise NotImplementedError(
-                "You should use identity pose2joints instead")
+            raise NotImplementedError("You should use identity pose2joints instead")
 
         poses = smpl_data.rots
         trans = smpl_data.trans
 
         from functools import reduce
         import operator
+
         save_shape_bs_len = poses.shape[:-3]
         nposes = reduce(operator.mul, save_shape_bs_len, 1)
 
@@ -82,15 +86,16 @@ class SMPLH(Rots2Joints):
         global_orient = matrix_poses[:, 0]
 
         if trans is None:
-            trans = torch.zeros((*save_shape_bs_len, 3),
-                                dtype=poses.dtype,
-                                device=poses.device)
+            trans = torch.zeros(
+                (*save_shape_bs_len, 3), dtype=poses.dtype, device=poses.device
+            )
 
         trans_all = trans.reshape((nposes, *trans.shape[-1:]))
 
         body_pose = matrix_poses[:, 1:22]
         if nohands:
             from mld.tools.easyconvert import to_matrix
+
             # still axis angle
             left_hand_pose = self.smplh.left_hand_mean.reshape(15, 3)
             left_hand_pose = to_matrix("axisangle", left_hand_pose)
@@ -113,7 +118,8 @@ class SMPLH(Rots2Joints):
                 body_pose=slice_or_none(body_pose, chunk_slice),
                 left_hand_pose=slice_or_none(left_hand_pose, chunk_slice),
                 right_hand_pose=slice_or_none(right_hand_pose, chunk_slice),
-                transl=slice_or_none(trans_all, chunk_slice))
+                transl=slice_or_none(trans_all, chunk_slice),
+            )
 
             if jointstype == "vertices":
                 output_chunk = smpl_output.vertices
@@ -138,12 +144,14 @@ def smplh_to(jointstype, data, trans):
 
     if "mmm" in jointstype:
         from mld.utils.joints import smplh2mmm_indexes
+
         indexes = smplh2mmm_indexes
         data = data[..., indexes, :]
 
         # make it compatible with mmm
         if jointstype == "mmm":
             from mld.utils.joints import smplh_to_mmm_scaling_factor
+
             data *= smplh_to_mmm_scaling_factor
 
         if jointstype == "smplmmm":
@@ -156,6 +164,7 @@ def smplh_to(jointstype, data, trans):
 
     elif jointstype == "smplnh":
         from mld.utils.joints import smplh2smplnh_indexes
+
         indexes = smplh2smplnh_indexes
         data = data[..., indexes, :]
     elif jointstype == "smplh":

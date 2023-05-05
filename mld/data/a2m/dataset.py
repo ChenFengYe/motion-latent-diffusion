@@ -12,19 +12,20 @@ POSE_REPS = ["xyz", "rotvec", "rotmat", "rotquat", "rot6d"]
 
 
 class Dataset(torch.utils.data.Dataset):
-
-    def __init__(self,
-                 num_frames=1,
-                 sampling="conseq",
-                 sampling_step=1,
-                 split="train",
-                 pose_rep="rot6d",
-                 translation=True,
-                 glob=True,
-                 max_len=-1,
-                 min_len=-1,
-                 num_seq_max=-1,
-                 **kwargs):
+    def __init__(
+        self,
+        num_frames=1,
+        sampling="conseq",
+        sampling_step=1,
+        split="train",
+        pose_rep="rot6d",
+        translation=True,
+        glob=True,
+        max_len=-1,
+        min_len=-1,
+        num_seq_max=-1,
+        **kwargs,
+    ):
         self.num_frames = num_frames
         self.sampling = sampling
         self.sampling_step = sampling_step
@@ -60,6 +61,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def label_to_action(self, label):
         import numbers
+
         if isinstance(label, numbers.Integral):
             return self._label_to_action[label]
         else:  # if it is one hot vector
@@ -93,13 +95,12 @@ class Dataset(torch.utils.data.Dataset):
         return self.action_to_action_name(action)
 
     def __getitem__(self, index):
-        if self.split == 'train':
+        if self.split == "train":
             data_index = self._train[index]
         else:
             data_index = self._test[index]
 
-        inp, target, lengths, action_text = self._get_item_data_index(
-            data_index)
+        inp, target, lengths, action_text = self._get_item_data_index(data_index)
         return inp, target, lengths, action_text
 
     def _load(self, ind, frame_ix):
@@ -131,16 +132,15 @@ class Dataset(torch.utils.data.Dataset):
                 if pose_rep == "rotvec":
                     ret = pose
                 elif pose_rep == "rotmat":
-                    ret = geometry.axis_angle_to_matrix(pose).view(
-                        *pose.shape[:2], 9)
+                    ret = geometry.axis_angle_to_matrix(pose).view(*pose.shape[:2], 9)
                 elif pose_rep == "rotquat":
                     ret = geometry.axis_angle_to_quaternion(pose)
                 elif pose_rep == "rot6d":
                     ret = geometry.matrix_to_rotation_6d(
-                        geometry.axis_angle_to_matrix(pose))
+                        geometry.axis_angle_to_matrix(pose)
+                    )
         if pose_rep != "xyz" and self.translation:
-            padded_tr = torch.zeros((ret.shape[0], ret.shape[2]),
-                                    dtype=ret.dtype)
+            padded_tr = torch.zeros((ret.shape[0], ret.shape[2]), dtype=ret.dtype)
             padded_tr[:, :3] = ret_tr
             ret = torch.cat((ret, padded_tr[:, None]), 1)
         ret = ret.permute(1, 2, 0).contiguous()
@@ -149,8 +149,7 @@ class Dataset(torch.utils.data.Dataset):
     def _get_item_data_index(self, data_index):
         nframes = self._num_frames_in_video[data_index]
 
-        if self.num_frames == -1 and (self.max_len == -1
-                                      or nframes <= self.max_len):
+        if self.num_frames == -1 and (self.max_len == -1 or nframes <= self.max_len):
             frame_ix = np.arange(nframes)
         else:
             if self.num_frames == -2:
@@ -163,8 +162,7 @@ class Dataset(torch.utils.data.Dataset):
                 else:
                     max_frame = nframes
 
-                num_frames = random.randint(self.min_len,
-                                            max(max_frame, self.min_len))
+                num_frames = random.randint(self.min_len, max(max_frame, self.min_len))
             else:
                 num_frames = self.num_frames if self.num_frames != -1 else self.max_len
             # sampling goal: input: ----------- 11 nframes
@@ -181,9 +179,7 @@ class Dataset(torch.utils.data.Dataset):
                 fair = False  # True
                 if fair:
                     # distills redundancy everywhere
-                    choices = np.random.choice(range(nframes),
-                                               num_frames,
-                                               replace=True)
+                    choices = np.random.choice(range(nframes), num_frames, replace=True)
                     frame_ix = sorted(choices)
                 else:
                     # adding the last frame until done
@@ -195,8 +191,10 @@ class Dataset(torch.utils.data.Dataset):
             elif self.sampling in ["conseq", "random_conseq"]:
                 step_max = (nframes - 1) // (num_frames - 1)
                 if self.sampling == "conseq":
-                    if self.sampling_step == -1 or self.sampling_step * (
-                            num_frames - 1) >= nframes:
+                    if (
+                        self.sampling_step == -1
+                        or self.sampling_step * (num_frames - 1) >= nframes
+                    ):
                         step = step_max
                     else:
                         step = self.sampling_step
@@ -209,43 +207,34 @@ class Dataset(torch.utils.data.Dataset):
                 frame_ix = shift + np.arange(0, lastone + 1, step)
 
             elif self.sampling == "random":
-                choices = np.random.choice(range(nframes),
-                                           num_frames,
-                                           replace=False)
+                choices = np.random.choice(range(nframes), num_frames, replace=False)
                 frame_ix = sorted(choices)
 
             else:
                 raise ValueError("Sampling not recognized.")
 
         inp, target = self.get_pose_data(data_index, frame_ix)
-        if hasattr(self, '_actions') and hasattr(self, '_action_classes'):
-            action_text = self.action_to_action_name(
-                self.get_action(data_index))
+        if hasattr(self, "_actions") and hasattr(self, "_action_classes"):
+            action_text = self.action_to_action_name(self.get_action(data_index))
         return inp, target, num_frames, action_text
 
-    def get_label_sample(self,
-                         label,
-                         n=1,
-                         return_labels=False,
-                         return_index=False):
-        if self.split == 'train':
+    def get_label_sample(self, label, n=1, return_labels=False, return_index=False):
+        if self.split == "train":
             index = self._train
         else:
             index = self._test
 
         action = self.label_to_action(label)
-        choices = np.argwhere(
-            np.array(self._actions)[index] == action).squeeze(1)
+        choices = np.argwhere(np.array(self._actions)[index] == action).squeeze(1)
 
         if n == 1:
             data_index = index[np.random.choice(choices)]
             x, y, lengths = self._get_item_data_index(data_index)
-            assert (label == y)
+            assert label == y
             y = label
         else:
             data_index = np.random.choice(choices, n)
-            x = np.stack(
-                [self._get_item_data_index(index[di])[0] for di in data_index])
+            x = np.stack([self._get_item_data_index(index[di])[0] for di in data_index])
             y = label * np.ones(n, dtype=int)
         if return_labels:
             if return_index:
@@ -258,10 +247,8 @@ class Dataset(torch.utils.data.Dataset):
 
     def get_label_sample_batch(self, labels):
         samples = [
-            self.get_label_sample(label,
-                                  n=1,
-                                  return_labels=True,
-                                  return_index=False) for label in labels
+            self.get_label_sample(label, n=1, return_labels=True, return_index=False)
+            for label in labels
         ]
         batch = collate(samples)
         x = batch["x"]
@@ -273,7 +260,7 @@ class Dataset(torch.utils.data.Dataset):
         if self.num_frames != -1:
             return self.num_frames
 
-        if self.split == 'train':
+        if self.split == "train":
             index = self._train
         else:
             index = self._test
@@ -290,14 +277,15 @@ class Dataset(torch.utils.data.Dataset):
         return np.mean(lengths)
 
     def get_stats(self):
-        if self.split == 'train':
+        if self.split == "train":
             index = self._train
         else:
             index = self._test
 
         numframes = self._num_frames_in_video[index]
         allmeans = np.array(
-            [self.get_mean_length_label(x) for x in range(self.num_classes)])
+            [self.get_mean_length_label(x) for x in range(self.num_classes)]
+        )
 
         stats = {
             "name": self.dataname,
@@ -308,7 +296,7 @@ class Dataset(torch.utils.data.Dataset):
             "duration: mean": int(numframes.mean()),
             "duration mean/action: min": int(allmeans.min()),
             "duration mean/action: max": int(allmeans.max()),
-            "duration mean/action: mean": int(allmeans.mean())
+            "duration mean/action: mean": int(allmeans.mean()),
         }
         return stats
 
@@ -316,9 +304,10 @@ class Dataset(torch.utils.data.Dataset):
         num_seq_max = getattr(self, "num_seq_max", -1)
         if num_seq_max == -1:
             from math import inf
+
             num_seq_max = inf
 
-        if self.split == 'train':
+        if self.split == "train":
             return min(len(self._train), num_seq_max)
         else:
             return min(len(self._test), num_seq_max)
@@ -333,13 +322,13 @@ class Dataset(torch.utils.data.Dataset):
         parameters["njoints"] = self.njoints
 
     def shuffle(self):
-        if self.split == 'train':
+        if self.split == "train":
             random.shuffle(self._train)
         else:
             random.shuffle(self._test)
 
     def reset_shuffle(self):
-        if self.split == 'train':
+        if self.split == "train":
             if self._original_train is None:
                 self._original_train = self._train
             else:

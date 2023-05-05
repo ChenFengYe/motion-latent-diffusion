@@ -44,8 +44,10 @@ def main():
     # create logger
     logger = create_logger(cfg, phase="test")
     output_dir = Path(
-        os.path.join(cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME),
-                     "samples_" + cfg.TIME))
+        os.path.join(
+            cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME), "samples_" + cfg.TIME
+        )
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info(OmegaConf.to_yaml(cfg))
 
@@ -61,13 +63,11 @@ def main():
 
     # create dataset
     datasets = get_datasets(cfg, logger=logger, phase="test")[0]
-    logger.info("datasets module {} initialized".format("".join(
-        cfg.TRAIN.DATASETS)))
+    logger.info("datasets module {} initialized".format("".join(cfg.TRAIN.DATASETS)))
 
     # create model
     model = get_model(cfg, datasets)
     logger.info("model {} loaded".format(cfg.model.model_type))
-    
 
     # optimizer
     metric_monitor = {
@@ -107,32 +107,31 @@ def main():
     # loading state dict
     logger.info("Loading checkpoints from {}".format(cfg.TEST.CHECKPOINTS))
 
-    state_dict = torch.load(cfg.TEST.CHECKPOINTS,
-                            map_location="cpu")["state_dict"]
+    state_dict = torch.load(cfg.TEST.CHECKPOINTS, map_location="cpu")["state_dict"]
     model.load_state_dict(state_dict)
 
     macs_lst = []
     params_lst = []
     flops_lst = []
-    for (i, batch) in enumerate(datasets.test_dataloader()):
-        print('batch size', len(batch['text']))
+    for i, batch in enumerate(datasets.test_dataloader()):
+        print("batch size", len(batch["text"]))
         macs, params = profile(model, (batch,))
         # flops = FlopCountAnalysis(model, batch).total()
         # print(flops)
         # flops_lst.append(flops)
-        print('macs', macs/1e9, 'G')
+        print("macs", macs / 1e9, "G")
         return
         macs_lst.append(macs)
         params_lst.append(params)
 
         if len(flops_lst) == 1:
             break
-    
+
     print(macs_lst)
     print(params_lst)
     # print(np.mean(flops_lst)/1e9)
-    print(np.mean(macs_lst)/1e9)
-    print(np.mean(params_lst)/1e6)
+    print(np.mean(macs_lst) / 1e9)
+    print(np.mean(params_lst) / 1e6)
 
 
 if __name__ == "__main__":

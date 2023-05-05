@@ -1,8 +1,17 @@
 from .frames import get_frameix_from_data_index
 
+
 class FrameSampler:
-    def __init__(self, sampling="conseq", sampling_step=1, request_frames=None,threshold_reject=0.75,max_len=1000,min_len=10):
-        self.sampling  = sampling
+    def __init__(
+        self,
+        sampling="conseq",
+        sampling_step=1,
+        request_frames=None,
+        threshold_reject=0.75,
+        max_len=1000,
+        min_len=10,
+    ):
+        self.sampling = sampling
 
         self.sampling_step = sampling_step
         self.request_frames = request_frames
@@ -11,11 +20,9 @@ class FrameSampler:
         self.min_len = min_len
 
     def __call__(self, num_frames):
-
-        return get_frameix_from_data_index(num_frames,
-                                           self.request_frames,
-                                           self.sampling,
-                                           self.sampling_step)
+        return get_frameix_from_data_index(
+            num_frames, self.request_frames, self.sampling, self.sampling_step
+        )
 
     def accept(self, duration):
         # Outputs have original lengths

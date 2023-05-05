@@ -3,9 +3,13 @@ import math
 import bpy
 import numpy as np
 
-from mld.utils.joints import (humanml3d_joints, humanml3d_kinematic_tree,
-                              mmm_joints, mmm_kinematic_tree,
-                              mmm_to_smplh_scaling_factor)
+from mld.utils.joints import (
+    humanml3d_joints,
+    humanml3d_kinematic_tree,
+    mmm_joints,
+    mmm_kinematic_tree,
+    mmm_to_smplh_scaling_factor,
+)
 
 # from .materials import colored_material_diffuse_BSDF as colored_material
 from .materials import colored_material_relection_BSDF as colored_material
@@ -31,15 +35,9 @@ JOINTS_MATS = [
 
 
 class Joints:
-
-    def __init__(self,
-                 data,
-                 *,
-                 mode,
-                 canonicalize,
-                 always_on_floor,
-                 jointstype="mmm",
-                 **kwargs):
+    def __init__(
+        self, data, *, mode, canonicalize, always_on_floor, jointstype="mmm", **kwargs
+    ):
         data = prepare_joints(
             data,
             canonicalize=canonicalize,
@@ -82,30 +80,28 @@ class Joints:
             for j1, j2 in zip(lst[:-1], lst[1:]):
                 # spine and head
                 if self.joints[j2] in [
-                        "BUN",
+                    "BUN",
                 ]:
                     sphere_between(skeleton[j1], skeleton[j2], head_mat)
                 elif self.joints[j2] in [
-                        "LE",
-                        "RE",
-                        "LW",
-                        "RW",
+                    "LE",
+                    "RE",
+                    "LW",
+                    "RW",
                 ]:
-                    cylinder_sphere_between(skeleton[j1], skeleton[j2], 0.040,
-                                            mat)
+                    cylinder_sphere_between(skeleton[j1], skeleton[j2], 0.040, mat)
                 elif self.joints[j2] in [
-                        "LMrot",
-                        "RMrot",
-                        "RK",
-                        "LK",
+                    "LMrot",
+                    "RMrot",
+                    "RK",
+                    "LK",
                 ]:
-                    cylinder_sphere_between(skeleton[j1], skeleton[j2], 0.040,
-                                            mat)
+                    cylinder_sphere_between(skeleton[j1], skeleton[j2], 0.040, mat)
                 elif self.joints[j2] in [
-                        "LS",
-                        "RS",
-                        "LF",
-                        "RF",
+                    "LS",
+                    "RS",
+                    "LF",
+                    "RF",
                 ]:
                     cylinder_between(skeleton[j1], skeleton[j2], 0.040, mat)
                 elif self.joints[j2] in ["RK", "LK"]:
@@ -166,8 +162,9 @@ def get_forward_direction(poses, jointstype="mmm"):
     # Hips
     LH, RH = mmm_joints.index("LH"), mmm_joints.index("RH")
 
-    across = (poses[..., RH, :] - poses[..., LH, :] + poses[..., RS, :] -
-              poses[..., LS, :])
+    across = (
+        poses[..., RH, :] - poses[..., LH, :] + poses[..., RS, :] - poses[..., LS, :]
+    )
     forward = np.stack((-across[..., 2], across[..., 0]), axis=-1)
     forward = forward / np.linalg.norm(forward, axis=-1)
     return forward
@@ -182,10 +179,9 @@ def cylinder_between(t1, t2, r, mat):
     dz = z2 - z1
     dist = math.sqrt(dx**2 + dy**2 + dz**2)
 
-    bpy.ops.mesh.primitive_cylinder_add(radius=r,
-                                        depth=dist,
-                                        location=(dx / 2 + x1, dy / 2 + y1,
-                                                  dz / 2 + z1))
+    bpy.ops.mesh.primitive_cylinder_add(
+        radius=r, depth=dist, location=(dx / 2 + x1, dy / 2 + y1, dz / 2 + z1)
+    )
 
     phi = math.atan2(dy, dx)
     theta = math.acos(dz / dist)
@@ -232,10 +228,9 @@ def cylinder_sphere_between(t1, t2, r, mat):
 
 
 def sphere(r, t, mat):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=50,
-                                         ring_count=50,
-                                         radius=r,
-                                         location=t)
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        segments=50, ring_count=50, radius=r, location=t
+    )
     # bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=t)
     # bpy.context.object.shade_smooth()
     bpy.context.object.active_material = mat
@@ -255,7 +250,8 @@ def sphere_between(t1, t2, mat, factor=1):
         ring_count=50,
         # bpy.ops.mesh.primitive_uv_sphere_add(
         radius=dist,
-        location=(dx / 2 + x1, dy / 2 + y1, dz / 2 + z1))
+        location=(dx / 2 + x1, dy / 2 + y1, dz / 2 + z1),
+    )
 
     # bpy.context.object.shade_smooth()
     bpy.context.object.active_material = mat
@@ -263,9 +259,9 @@ def sphere_between(t1, t2, mat, factor=1):
 
 def matrix_of_angles(cos, sin, inv=False):
     sin = -sin if inv else sin
-    return np.stack((np.stack(
-        (cos, -sin), axis=-1), np.stack((sin, cos), axis=-1)),
-                    axis=-2)
+    return np.stack(
+        (np.stack((cos, -sin), axis=-1), np.stack((sin, cos), axis=-1)), axis=-2
+    )
 
 
 def get_floor(poses, jointstype="mmm"):
@@ -312,24 +308,20 @@ def canonicalize_joints(joints, jointstype="mmm"):
     rotations_inv = matrix_of_angles(cos, sin, inv=True)
 
     # Rotate the trajectory
-    trajectory_rotated = np.einsum("...j,...jk->...k", trajectory,
-                                   rotations_inv)
+    trajectory_rotated = np.einsum("...j,...jk->...k", trajectory, rotations_inv)
 
     # Rotate the poses
-    poses_rotated = np.einsum("...lj,...jk->...lk", poses[..., [0, 2]],
-                              rotations_inv)
+    poses_rotated = np.einsum("...lj,...jk->...lk", poses[..., [0, 2]], rotations_inv)
     poses_rotated = np.stack(
-        (poses_rotated[..., 0], poses[..., 1], poses_rotated[..., 1]), axis=-1)
+        (poses_rotated[..., 0], poses[..., 1], poses_rotated[..., 1]), axis=-1
+    )
 
     # Re-merge the pose and translation
     poses_rotated[..., (0, 2)] += trajectory_rotated[..., None, :]
     return poses_rotated
 
 
-def prepare_joints(joints,
-                   canonicalize=True,
-                   always_on_floor=False,
-                   jointstype="mmm"):
+def prepare_joints(joints, canonicalize=True, always_on_floor=False, jointstype="mmm"):
     # All face the same direction for the first frame
     if canonicalize:
         data = canonicalize_joints(joints, jointstype)
@@ -373,5 +365,4 @@ def GoingDown(normal, limit=0.5):
 
 
 def GoingSide(normal, limit=0.5):
-    return GoingUp(normal, limit) == False and GoingDown(normal,
-                                                         limit) == False
+    return GoingUp(normal, limit) == False and GoingDown(normal, limit) == False

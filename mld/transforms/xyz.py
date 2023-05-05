@@ -8,14 +8,13 @@ from .joints2jfeats import Joints2Jfeats
 
 
 class XYZTransform(Transform):
-
     def __init__(self, joints2jfeats: Joints2Jfeats, **kwargs):
         self.joints2jfeats = joints2jfeats
 
     def Datastruct(self, **kwargs):
-        return XYZDatastruct(_joints2jfeats=self.joints2jfeats,
-                             transforms=self,
-                             **kwargs)
+        return XYZDatastruct(
+            _joints2jfeats=self.joints2jfeats, transforms=self, **kwargs
+        )
 
     def __repr__(self):
         return "XYZTransform()"

@@ -50,8 +50,9 @@ class MLD(BaseModel):
         try:
             self.vae_type = cfg.model.vae_type
         except:
-            self.vae_type = cfg.model.motion_vae.target.split(
-                ".")[-1].lower().replace("vae", "")
+            self.vae_type = (
+                cfg.model.motion_vae.target.split(".")[-1].lower().replace("vae", "")
+            )
 
         self.text_encoder = instantiate_from_config(cfg.model.text_encoder)
 
@@ -60,7 +61,7 @@ class MLD(BaseModel):
 
         # Don't train the motion encoder and decoder
         if self.stage == "diffusion":
-            if self.vae_type in ["mld", "vposert","actor"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 self.vae.training = False
                 for p in self.vae.parameters():
                     p.requires_grad = False
@@ -76,34 +77,31 @@ class MLD(BaseModel):
 
         self.denoiser = instantiate_from_config(cfg.model.denoiser)
         if not self.predict_epsilon:
-            cfg.model.scheduler.params['prediction_type'] = 'sample'
-            cfg.model.noise_scheduler.params['prediction_type'] = 'sample'
+            cfg.model.scheduler.params["prediction_type"] = "sample"
+            cfg.model.noise_scheduler.params["prediction_type"] = "sample"
         self.scheduler = instantiate_from_config(cfg.model.scheduler)
-        self.noise_scheduler = instantiate_from_config(
-            cfg.model.noise_scheduler)
+        self.noise_scheduler = instantiate_from_config(cfg.model.noise_scheduler)
 
         if self.condition in ["text", "text_uncond"]:
             self._get_t2m_evaluator(cfg)
 
         if cfg.TRAIN.OPTIM.TYPE.lower() == "adamw":
-            self.optimizer = AdamW(lr=cfg.TRAIN.OPTIM.LR,
-                                   params=self.parameters())
+            self.optimizer = AdamW(lr=cfg.TRAIN.OPTIM.LR, params=self.parameters())
         else:
-            raise NotImplementedError(
-                "Do not support other optimizer for now.")
+            raise NotImplementedError("Do not support other optimizer for now.")
 
         if cfg.LOSS.TYPE == "mld":
-            self._losses = MetricCollection({
-                split: MLDLosses(vae=self.is_vae, mode="xyz", cfg=cfg)
-                for split in ["losses_train", "losses_test", "losses_val"]
-            })
+            self._losses = MetricCollection(
+                {
+                    split: MLDLosses(vae=self.is_vae, mode="xyz", cfg=cfg)
+                    for split in ["losses_train", "losses_test", "losses_val"]
+                }
+            )
         else:
-            raise NotImplementedError(
-                "MotionCross model only supports mld losses.")
+            raise NotImplementedError("MotionCross model only supports mld losses.")
 
         self.losses = {
-            key: self._losses["losses_" + key]
-            for key in ["train", "test", "val"]
+            key: self._losses["losses_" + key] for key in ["train", "test", "val"]
         }
 
         self.metrics_dict = cfg.METRIC.TYPE
@@ -113,34 +111,36 @@ class MLD(BaseModel):
         self.sample_mean = False
         self.fact = None
         self.do_classifier_free_guidance = self.guidance_scale > 1.0
-        if self.condition in ['text', 'text_uncond']:
+        if self.condition in ["text", "text_uncond"]:
             self.feats2joints = datamodule.feats2joints
-        elif self.condition == 'action':
+        elif self.condition == "action":
             self.rot2xyz = Rotation2xyz(smpl_path=cfg.DATASET.SMPL_PATH)
             self.feats2joints_eval = lambda sample, mask: self.rot2xyz(
                 sample.view(*sample.shape[:-1], 6, 25).permute(0, 3, 2, 1),
                 mask=mask,
-                pose_rep='rot6d',
+                pose_rep="rot6d",
                 glob=True,
                 translation=True,
-                jointstype='smpl',
+                jointstype="smpl",
                 vertstrans=True,
                 betas=None,
                 beta=0,
                 glob_rot=None,
-                get_rotations_back=False)
+                get_rotations_back=False,
+            )
             self.feats2joints = lambda sample, mask: self.rot2xyz(
                 sample.view(*sample.shape[:-1], 6, 25).permute(0, 3, 2, 1),
                 mask=mask,
-                pose_rep='rot6d',
+                pose_rep="rot6d",
                 glob=True,
                 translation=True,
-                jointstype='vertices',
+                jointstype="vertices",
                 vertstrans=False,
                 betas=None,
                 beta=0,
                 glob_rot=None,
-                get_rotations_back=False)
+                get_rotations_back=False,
+            )
 
     def _get_t2m_evaluator(self, cfg):
         """
@@ -169,13 +169,13 @@ class MLD(BaseModel):
         dataname = cfg.TEST.DATASETS[0]
         dataname = "t2m" if dataname == "humanml3d" else dataname
         t2m_checkpoint = torch.load(
-            os.path.join(cfg.model.t2m_path, dataname,
-                         "text_mot_match/model/finest.tar"))
+            os.path.join(
+                cfg.model.t2m_path, dataname, "text_mot_match/model/finest.tar"
+            )
+        )
         self.t2m_textencoder.load_state_dict(t2m_checkpoint["text_encoder"])
-        self.t2m_moveencoder.load_state_dict(
-            t2m_checkpoint["movement_encoder"])
-        self.t2m_motionencoder.load_state_dict(
-            t2m_checkpoint["motion_encoder"])
+        self.t2m_moveencoder.load_state_dict(t2m_checkpoint["movement_encoder"])
+        self.t2m_motionencoder.load_state_dict(t2m_checkpoint["motion_encoder"])
 
         # freeze params
         self.t2m_textencoder.eval()
@@ -219,24 +219,24 @@ class MLD(BaseModel):
         if self.cfg.TEST.COUNT_TIME:
             self.starttime = time.time()
 
-        if self.stage in ['diffusion', 'vae_diffusion']:
+        if self.stage in ["diffusion", "vae_diffusion"]:
             # diffusion reverse
             if self.do_classifier_free_guidance:
                 uncond_tokens = [""] * len(texts)
-                if self.condition == 'text':
+                if self.condition == "text":
                     uncond_tokens.extend(texts)
-                elif self.condition == 'text_uncond':
+                elif self.condition == "text_uncond":
                     uncond_tokens.extend(uncond_tokens)
                 texts = uncond_tokens
             text_emb = self.text_encoder(texts)
             z = self._diffusion_reverse(text_emb, lengths)
-        elif self.stage in ['vae']:
-            motions = batch['motion']
+        elif self.stage in ["vae"]:
+            motions = batch["motion"]
             z, dist_m = self.vae.encode(motions, lengths)
 
         with torch.no_grad():
             # ToDo change mcross actor to same api
-            if self.vae_type in ["mld","actor"]:
+            if self.vae_type in ["mld", "actor"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
@@ -246,21 +246,19 @@ class MLD(BaseModel):
             elapsed = self.endtime - self.starttime
             self.times.append(elapsed)
             if len(self.times) % 100 == 0:
-                meantime = np.mean(
-                    self.times[-100:]) / self.cfg.TEST.BATCH_SIZE
+                meantime = np.mean(self.times[-100:]) / self.cfg.TEST.BATCH_SIZE
                 print(
-                    f'100 iter mean Time (batch_size: {self.cfg.TEST.BATCH_SIZE}): {meantime}',
+                    f"100 iter mean Time (batch_size: {self.cfg.TEST.BATCH_SIZE}): {meantime}",
                 )
             if len(self.times) % 1000 == 0:
-                meantime = np.mean(
-                    self.times[-1000:]) / self.cfg.TEST.BATCH_SIZE
+                meantime = np.mean(self.times[-1000:]) / self.cfg.TEST.BATCH_SIZE
                 print(
-                    f'1000 iter mean Time (batch_size: {self.cfg.TEST.BATCH_SIZE}): {meantime}',
+                    f"1000 iter mean Time (batch_size: {self.cfg.TEST.BATCH_SIZE}): {meantime}",
                 )
-                with open(pjoin(self.cfg.FOLDER_EXP, 'times.txt'), 'w') as f:
+                with open(pjoin(self.cfg.FOLDER_EXP, "times.txt"), "w") as f:
                     for line in self.times:
                         f.write(str(line))
-                        f.write('\n')
+                        f.write("\n")
         joints = self.feats2joints(feats_rst.detach().cpu())
         return remove_padding(joints, lengths)
 
@@ -284,8 +282,7 @@ class MLD(BaseModel):
         # feats => joints
         joints = self.feats2joints(feats_rst.detach().cpu())
         joints_ref = self.feats2joints(feats_ref.detach().cpu())
-        return remove_padding(joints,
-                              length), remove_padding(joints_ref, length)
+        return remove_padding(joints, length), remove_padding(joints_ref, length)
 
     def _diffusion_reverse(self, encoder_hidden_states, lengths=None):
         # init latents
@@ -293,7 +290,9 @@ class MLD(BaseModel):
         if self.do_classifier_free_guidance:
             bsz = bsz // 2
         if self.vae_type == "no":
-            assert lengths is not None, "no vae (diffusion only) need lengths for diffusion"
+            assert (
+                lengths is not None
+            ), "no vae (diffusion only) need lengths for diffusion"
             latents = torch.randn(
                 (bsz, max(lengths), self.cfg.DATASET.NFEATS),
                 device=encoder_hidden_states.device,
@@ -309,24 +308,25 @@ class MLD(BaseModel):
         # scale the initial noise by the standard deviation required by the scheduler
         latents = latents * self.scheduler.init_noise_sigma
         # set timesteps
-        self.scheduler.set_timesteps(
-            self.cfg.model.scheduler.num_inference_timesteps)
+        self.scheduler.set_timesteps(self.cfg.model.scheduler.num_inference_timesteps)
         timesteps = self.scheduler.timesteps.to(encoder_hidden_states.device)
         # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
         # eta (η) is only used with the DDIMScheduler, and between [0, 1]
         extra_step_kwargs = {}
-        if "eta" in set(
-                inspect.signature(self.scheduler.step).parameters.keys()):
+        if "eta" in set(inspect.signature(self.scheduler.step).parameters.keys()):
             extra_step_kwargs["eta"] = self.cfg.model.scheduler.eta
 
         # reverse
         for i, t in enumerate(timesteps):
             # expand the latents if we are doing classifier free guidance
-            latent_model_input = (torch.cat(
-                [latents] *
-                2) if self.do_classifier_free_guidance else latents)
-            lengths_reverse = (lengths * 2 if self.do_classifier_free_guidance
-                               else lengths)
+            latent_model_input = (
+                torch.cat([latents] * 2)
+                if self.do_classifier_free_guidance
+                else latents
+            )
+            lengths_reverse = (
+                lengths * 2 if self.do_classifier_free_guidance else lengths
+            )
             # latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
             # predict the noise residual
             noise_pred = self.denoiser(
@@ -339,11 +339,13 @@ class MLD(BaseModel):
             if self.do_classifier_free_guidance:
                 noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
                 noise_pred = noise_pred_uncond + self.guidance_scale * (
-                    noise_pred_text - noise_pred_uncond)
+                    noise_pred_text - noise_pred_uncond
+                )
                 # text_embeddings_for_guidance = encoder_hidden_states.chunk(
                 #     2)[1] if self.do_classifier_free_guidance else encoder_hidden_states
-            latents = self.scheduler.step(noise_pred, t, latents,
-                                              **extra_step_kwargs).prev_sample
+            latents = self.scheduler.step(
+                noise_pred, t, latents, **extra_step_kwargs
+            ).prev_sample
             # if self.predict_epsilon:
             #     latents = self.scheduler.step(noise_pred, t, latents,
             #                                   **extra_step_kwargs).prev_sample
@@ -358,14 +360,16 @@ class MLD(BaseModel):
         # [batch_size, 1, latent_dim] -> [1, batch_size, latent_dim]
         latents = latents.permute(1, 0, 2)
         return latents
-    
+
     def _diffusion_reverse_tsne(self, encoder_hidden_states, lengths=None):
         # init latents
         bsz = encoder_hidden_states.shape[0]
         if self.do_classifier_free_guidance:
             bsz = bsz // 2
         if self.vae_type == "no":
-            assert lengths is not None, "no vae (diffusion only) need lengths for diffusion"
+            assert (
+                lengths is not None
+            ), "no vae (diffusion only) need lengths for diffusion"
             latents = torch.randn(
                 (bsz, max(lengths), self.cfg.DATASET.NFEATS),
                 device=encoder_hidden_states.device,
@@ -381,25 +385,26 @@ class MLD(BaseModel):
         # scale the initial noise by the standard deviation required by the scheduler
         latents = latents * self.scheduler.init_noise_sigma
         # set timesteps
-        self.scheduler.set_timesteps(
-            self.cfg.model.scheduler.num_inference_timesteps)
+        self.scheduler.set_timesteps(self.cfg.model.scheduler.num_inference_timesteps)
         timesteps = self.scheduler.timesteps.to(encoder_hidden_states.device)
         # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
         # eta (η) is only used with the DDIMScheduler, and between [0, 1]
         extra_step_kwargs = {}
-        if "eta" in set(
-                inspect.signature(self.scheduler.step).parameters.keys()):
+        if "eta" in set(inspect.signature(self.scheduler.step).parameters.keys()):
             extra_step_kwargs["eta"] = self.cfg.model.scheduler.eta
 
         # reverse
         latents_t = []
         for i, t in enumerate(timesteps):
             # expand the latents if we are doing classifier free guidance
-            latent_model_input = (torch.cat(
-                [latents] *
-                2) if self.do_classifier_free_guidance else latents)
-            lengths_reverse = (lengths * 2 if self.do_classifier_free_guidance
-                               else lengths)
+            latent_model_input = (
+                torch.cat([latents] * 2)
+                if self.do_classifier_free_guidance
+                else latents
+            )
+            lengths_reverse = (
+                lengths * 2 if self.do_classifier_free_guidance else lengths
+            )
             # latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
             # predict the noise residual
             noise_pred = self.denoiser(
@@ -412,13 +417,15 @@ class MLD(BaseModel):
             if self.do_classifier_free_guidance:
                 noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
                 noise_pred = noise_pred_uncond + self.guidance_scale * (
-                    noise_pred_text - noise_pred_uncond)
+                    noise_pred_text - noise_pred_uncond
+                )
                 # text_embeddings_for_guidance = encoder_hidden_states.chunk(
                 #     2)[1] if self.do_classifier_free_guidance else encoder_hidden_states
-            latents = self.scheduler.step(noise_pred, t, latents,
-                                              **extra_step_kwargs).prev_sample
+            latents = self.scheduler.step(
+                noise_pred, t, latents, **extra_step_kwargs
+            ).prev_sample
             # [batch_size, 1, latent_dim] -> [1, batch_size, latent_dim]
-            latents_t.append(latents.permute(1,0,2))
+            latents_t.append(latents.permute(1, 0, 2))
         # [1, batch_size, latent_dim] -> [t, batch_size, latent_dim]
         latents_t = torch.cat(latents_t)
         return latents_t
@@ -440,13 +447,14 @@ class MLD(BaseModel):
         timesteps = torch.randint(
             0,
             self.noise_scheduler.config.num_train_timesteps,
-            (bsz, ),
+            (bsz,),
             device=latents.device,
         )
         timesteps = timesteps.long()
         # Add noise to the latents according to the noise magnitude at each timestep
-        noisy_latents = self.noise_scheduler.add_noise(latents.clone(), noise,
-                                                       timesteps)
+        noisy_latents = self.noise_scheduler.add_noise(
+            latents.clone(), noise, timesteps
+        )
         # Predict the noise residual
         noise_pred = self.denoiser(
             sample=noisy_latents,
@@ -534,14 +542,11 @@ class MLD(BaseModel):
         if self.condition in ["text", "text_uncond"]:
             text = batch["text"]
             # classifier free guidance: randomly drop text during training
-            text = [
-                "" if np.random.rand(1) < self.guidance_uncodp else i
-                for i in text
-            ]
+            text = ["" if np.random.rand(1) < self.guidance_uncodp else i for i in text]
             # text encode
             cond_emb = self.text_encoder(text)
-        elif self.condition in ['action']:
-            action = batch['action']
+        elif self.condition in ["action"]:
+            action = batch["action"]
             # text encode
             cond_emb = action
         else:
@@ -558,20 +563,20 @@ class MLD(BaseModel):
             # get text embeddings
             if self.do_classifier_free_guidance:
                 uncond_tokens = [""] * len(lengths)
-                if self.condition == 'text':
+                if self.condition == "text":
                     texts = batch["text"]
                     uncond_tokens.extend(texts)
-                elif self.condition == 'text_uncond':
+                elif self.condition == "text_uncond":
                     uncond_tokens.extend(uncond_tokens)
                 texts = uncond_tokens
             cond_emb = self.text_encoder(texts)
-        elif self.condition in ['action']:
-            cond_emb = batch['action']
+        elif self.condition in ["action"]:
+            cond_emb = batch["action"]
             if self.do_classifier_free_guidance:
                 cond_emb = torch.cat(
                     cond_emb,
-                    torch.zeros_like(batch['action'],
-                                     dtype=batch['action'].dtype))
+                    torch.zeros_like(batch["action"], dtype=batch["action"].dtype),
+                )
         else:
             raise TypeError(f"condition type {self.condition} not supported")
 
@@ -628,33 +633,31 @@ class MLD(BaseModel):
 
         if self.trainer.datamodule.is_mm:
             texts = texts * self.cfg.TEST.MM_NUM_REPEATS
-            motions = motions.repeat_interleave(self.cfg.TEST.MM_NUM_REPEATS,
-                                                dim=0)
+            motions = motions.repeat_interleave(self.cfg.TEST.MM_NUM_REPEATS, dim=0)
             lengths = lengths * self.cfg.TEST.MM_NUM_REPEATS
-            word_embs = word_embs.repeat_interleave(
-                self.cfg.TEST.MM_NUM_REPEATS, dim=0)
-            pos_ohot = pos_ohot.repeat_interleave(self.cfg.TEST.MM_NUM_REPEATS,
-                                                  dim=0)
+            word_embs = word_embs.repeat_interleave(self.cfg.TEST.MM_NUM_REPEATS, dim=0)
+            pos_ohot = pos_ohot.repeat_interleave(self.cfg.TEST.MM_NUM_REPEATS, dim=0)
             text_lengths = text_lengths.repeat_interleave(
-                self.cfg.TEST.MM_NUM_REPEATS, dim=0)
+                self.cfg.TEST.MM_NUM_REPEATS, dim=0
+            )
 
-        if self.stage in ['diffusion', 'vae_diffusion']:
+        if self.stage in ["diffusion", "vae_diffusion"]:
             # diffusion reverse
             if self.do_classifier_free_guidance:
                 uncond_tokens = [""] * len(texts)
-                if self.condition == 'text':
+                if self.condition == "text":
                     uncond_tokens.extend(texts)
-                elif self.condition == 'text_uncond':
+                elif self.condition == "text_uncond":
                     uncond_tokens.extend(uncond_tokens)
                 texts = uncond_tokens
             text_emb = self.text_encoder(texts)
             z = self._diffusion_reverse(text_emb, lengths)
-        elif self.stage in ['vae']:
+        elif self.stage in ["vae"]:
             if self.vae_type in ["mld", "vposert", "actor"]:
                 z, dist_m = self.vae.encode(motions, lengths)
             else:
                 raise TypeError("Not supported vae type!")
-            if self.condition in ['text_uncond']:
+            if self.condition in ["text_uncond"]:
                 # uncond random sample
                 z = torch.randn_like(z)
 
@@ -683,9 +686,9 @@ class MLD(BaseModel):
         motions = motions[align_idx]
         feats_rst = feats_rst[align_idx]
         m_lens = m_lens[align_idx]
-        m_lens = torch.div(m_lens,
-                           self.cfg.DATASET.HUMANML3D.UNIT_LEN,
-                           rounding_mode="floor")
+        m_lens = torch.div(
+            m_lens, self.cfg.DATASET.HUMANML3D.UNIT_LEN, rounding_mode="floor"
+        )
 
         recons_mov = self.t2m_moveencoder(feats_rst[..., :-4]).detach()
         recons_emb = self.t2m_motionencoder(recons_mov, m_lens)
@@ -693,8 +696,7 @@ class MLD(BaseModel):
         motion_emb = self.t2m_motionencoder(motion_mov, m_lens)
 
         # t2m text encoder
-        text_emb = self.t2m_textencoder(word_embs, pos_ohot,
-                                        text_lengths)[align_idx]
+        text_emb = self.t2m_textencoder(word_embs, pos_ohot, text_lengths)[align_idx]
 
         rs_set = {
             "m_ref": motions,
@@ -716,16 +718,16 @@ class MLD(BaseModel):
         if self.do_classifier_free_guidance:
             cond_emb = torch.cat((torch.zeros_like(actions), actions))
 
-        if self.stage in ['diffusion', 'vae_diffusion']:
+        if self.stage in ["diffusion", "vae_diffusion"]:
             z = self._diffusion_reverse(cond_emb, lengths)
-        elif self.stage in ['vae']:
-            if self.vae_type in ["mld", "vposert","actor"]:
+        elif self.stage in ["vae"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 z, dist_m = self.vae.encode(motions, lengths)
             else:
                 raise TypeError("vae_type must be mcross or actor")
 
         with torch.no_grad():
-            if self.vae_type in ["mld", "vposert","actor"]:
+            if self.vae_type in ["mld", "vposert", "actor"]:
                 feats_rst = self.vae.decode(z, lengths)
             elif self.vae_type == "no":
                 feats_rst = z.permute(1, 0, 2)
@@ -757,7 +759,7 @@ class MLD(BaseModel):
         lengths = batch["length"]
         mask = batch["mask"]
 
-        joints_ref = self.feats2joints(motions.to('cuda'), mask.to('cuda'))
+        joints_ref = self.feats2joints(motions.to("cuda"), mask.to("cuda"))
 
         rs_set = {
             "m_action": actions,
@@ -782,9 +784,9 @@ class MLD(BaseModel):
         align_idx = np.argsort(m_lens.data.tolist())[::-1].copy()
         motions = motions[align_idx]
         m_lens = m_lens[align_idx]
-        m_lens = torch.div(m_lens,
-                           self.cfg.DATASET.HUMANML3D.UNIT_LEN,
-                           rounding_mode="floor")
+        m_lens = torch.div(
+            m_lens, self.cfg.DATASET.HUMANML3D.UNIT_LEN, rounding_mode="floor"
+        )
 
         word_embs = batch["word_embs"].detach()
         pos_ohot = batch["pos_ohot"].detach()
@@ -794,8 +796,7 @@ class MLD(BaseModel):
         motion_emb = self.t2m_motionencoder(motion_mov, m_lens)
 
         # t2m text encoder
-        text_emb = self.t2m_textencoder(word_embs, pos_ohot,
-                                        text_lengths)[align_idx]
+        text_emb = self.t2m_textencoder(word_embs, pos_ohot, text_lengths)[align_idx]
 
         # joints recover
         joints_ref = self.feats2joints(motions)
@@ -818,8 +819,7 @@ class MLD(BaseModel):
             elif self.stage == "vae_diffusion":
                 vae_rs_set = self.train_vae_forward(batch)
                 diff_rs_set = self.train_diffusion_forward(batch)
-                t2m_rs_set = self.test_diffusion_forward(batch,
-                                                         finetune_decoder=True)
+                t2m_rs_set = self.test_diffusion_forward(batch, finetune_decoder=True)
                 # merge results
                 rs_set = {
                     **vae_rs_set,
@@ -833,38 +833,36 @@ class MLD(BaseModel):
 
             loss = self.losses[split].update(rs_set)
             if loss is None:
-                raise ValueError(
-                    "Loss is None, this happend with torchmetrics > 0.7")
+                raise ValueError("Loss is None, this happend with torchmetrics > 0.7")
 
         # Compute the metrics - currently evaluate results from text to motion
         if split in ["val", "test"]:
-            if self.condition in ['text', 'text_uncond']:
+            if self.condition in ["text", "text_uncond"]:
                 # use t2m evaluators
                 rs_set = self.t2m_eval(batch)
-            elif self.condition == 'action':
+            elif self.condition == "action":
                 # use a2m evaluators
                 rs_set = self.a2m_eval(batch)
             # MultiModality evaluation sperately
             if self.trainer.datamodule.is_mm:
-                metrics_dicts = ['MMMetrics']
+                metrics_dicts = ["MMMetrics"]
             else:
                 metrics_dicts = self.metrics_dict
 
             for metric in metrics_dicts:
                 if metric == "TemosMetric":
                     phase = split if split != "val" else "eval"
-                    if eval(f"self.cfg.{phase.upper()}.DATASETS")[0].lower(
-                    ) not in [
-                            "humanml3d",
-                            "kit",
+                    if eval(f"self.cfg.{phase.upper()}.DATASETS")[0].lower() not in [
+                        "humanml3d",
+                        "kit",
                     ]:
                         raise TypeError(
                             "APE and AVE metrics only support humanml3d and kit datasets now"
                         )
 
-                    getattr(self, metric).update(rs_set["joints_rst"],
-                                                 rs_set["joints_ref"],
-                                                 batch["length"])
+                    getattr(self, metric).update(
+                        rs_set["joints_rst"], rs_set["joints_ref"], batch["length"]
+                    )
                 elif metric == "TM2TMetrics":
                     getattr(self, metric).update(
                         # lat_t, latent encoded from diffusion-based text
@@ -883,26 +881,32 @@ class MLD(BaseModel):
                         lengths=batch["length"],
                     )
                 elif metric == "MRMetrics":
-                    getattr(self, metric).update(rs_set["joints_rst"],
-                                                 rs_set["joints_ref"],
-                                                 batch["length"])
+                    getattr(self, metric).update(
+                        rs_set["joints_rst"], rs_set["joints_ref"], batch["length"]
+                    )
                 elif metric == "MMMetrics":
-                    getattr(self, metric).update(rs_set["lat_rm"].unsqueeze(0),
-                                                 batch["length"])
+                    getattr(self, metric).update(
+                        rs_set["lat_rm"].unsqueeze(0), batch["length"]
+                    )
                 elif metric == "HUMANACTMetrics":
-                    getattr(self, metric).update(rs_set["m_action"],
-                                                 rs_set["joints_eval_rst"],
-                                                 rs_set["joints_eval_ref"],
-                                                 rs_set["m_lens"])
+                    getattr(self, metric).update(
+                        rs_set["m_action"],
+                        rs_set["joints_eval_rst"],
+                        rs_set["joints_eval_ref"],
+                        rs_set["m_lens"],
+                    )
                 elif metric == "UESTCMetrics":
                     # the stgcn model expects rotations only
                     getattr(self, metric).update(
                         rs_set["m_action"],
-                        rs_set["m_rst"].view(*rs_set["m_rst"].shape[:-1], 6,
-                                             25).permute(0, 3, 2, 1)[:, :-1],
-                        rs_set["m_ref"].view(*rs_set["m_ref"].shape[:-1], 6,
-                                             25).permute(0, 3, 2, 1)[:, :-1],
-                        rs_set["m_lens"])
+                        rs_set["m_rst"]
+                        .view(*rs_set["m_rst"].shape[:-1], 6, 25)
+                        .permute(0, 3, 2, 1)[:, :-1],
+                        rs_set["m_ref"]
+                        .view(*rs_set["m_ref"].shape[:-1], 6, 25)
+                        .permute(0, 3, 2, 1)[:, :-1],
+                        rs_set["m_lens"],
+                    )
                 else:
                     raise TypeError(f"Not support this metric {metric}")
 

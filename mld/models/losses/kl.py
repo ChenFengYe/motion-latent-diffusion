@@ -1,5 +1,6 @@
 import torch
 
+
 class KLLoss:
     def __init__(self):
         pass
@@ -10,14 +11,14 @@ class KLLoss:
 
     def __repr__(self):
         return "KLLoss()"
-        
+
+
 class KLLossMulti:
     def __init__(self):
         self.klloss = KLLoss()
 
     def __call__(self, qlist, plist):
-        return sum([self.klloss(q, p)
-                    for q, p in zip(qlist, plist)])
+        return sum([self.klloss(q, p) for q, p in zip(qlist, plist)])
 
     def __repr__(self):
         return "KLLossMulti()"

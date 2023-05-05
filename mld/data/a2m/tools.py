@@ -15,5 +15,3 @@ def parse_info_name(path):
     for key in info.keys():
         info[key] = "".join(info[key])
     return info
-
-

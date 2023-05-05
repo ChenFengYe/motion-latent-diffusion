@@ -9,14 +9,15 @@ from .tools import get_forward_direction, get_floor, gaussian_filter1d, T  # noq
 
 
 class Rifke(Joints2Jfeats):
-
-    def __init__(self,
-                 jointstype: str = "mmm",
-                 path: Optional[str] = None,
-                 normalization: bool = False,
-                 forward_filter: bool = False,
-                 **kwargs) -> None:
-        if jointstype not in ["mmm", "mmmns", 'humanml3d']:
+    def __init__(
+        self,
+        jointstype: str = "mmm",
+        path: Optional[str] = None,
+        normalization: bool = False,
+        forward_filter: bool = False,
+        **kwargs
+    ) -> None:
+        if jointstype not in ["mmm", "mmmns", "humanml3d"]:
             print("This function assume that the root is the first index")
             raise NotImplementedError("This jointstype is not implemented.")
 
@@ -49,7 +50,8 @@ class Rifke(Joints2Jfeats):
         vel_trajectory = torch.diff(trajectory, dim=-2)
         # 0 for the first one => keep the dimentionality
         vel_trajectory = torch.cat(
-            (0 * vel_trajectory[..., [0], :], vel_trajectory), dim=-2)
+            (0 * vel_trajectory[..., [0], :], vel_trajectory), dim=-2
+        )
 
         # Compute the forward direction
         forward = get_forward_direction(poses, jointstype=self.jointstype)
@@ -69,22 +71,31 @@ class Rifke(Joints2Jfeats):
         rotations_inv = matrix_of_angles(cos, sin, inv=True)
 
         # Rotate the poses
-        poses_local = torch.einsum("...lj,...jk->...lk", poses[..., [0, 2]],
-                                   rotations_inv)
+        poses_local = torch.einsum(
+            "...lj,...jk->...lk", poses[..., [0, 2]], rotations_inv
+        )
         poses_local = torch.stack(
-            (poses_local[..., 0], poses[..., 1], poses_local[..., 1]), axis=-1)
+            (poses_local[..., 0], poses[..., 1], poses_local[..., 1]), axis=-1
+        )
 
         # stack the xyz joints into feature vectors
-        poses_features = rearrange(poses_local,
-                                   "... joints xyz -> ... (joints xyz)")
+        poses_features = rearrange(poses_local, "... joints xyz -> ... (joints xyz)")
 
         # Rotate the vel_trajectory
-        vel_trajectory_local = torch.einsum("...j,...jk->...k", vel_trajectory,
-                                            rotations_inv)
+        vel_trajectory_local = torch.einsum(
+            "...j,...jk->...k", vel_trajectory, rotations_inv
+        )
 
         # Stack things together
-        features = torch.cat((root_y[..., None], poses_features,
-                              vel_angles[..., None], vel_trajectory_local), -1)
+        features = torch.cat(
+            (
+                root_y[..., None],
+                poses_features,
+                vel_angles[..., None],
+                vel_trajectory_local,
+            ),
+            -1,
+        )
 
         # Normalize if needed
         features = self.normalize(features)
@@ -93,7 +104,8 @@ class Rifke(Joints2Jfeats):
     def inverse(self, features: Tensor) -> Tensor:
         features = self.unnormalize(features)
         root_y, poses_features, vel_angles, vel_trajectory_local = self.extract(
-            features)
+            features
+        )
 
         # already have the good dimensionality
         angles = torch.cumsum(vel_angles, dim=-1)
@@ -104,19 +116,20 @@ class Rifke(Joints2Jfeats):
         rotations = matrix_of_angles(cos, sin, inv=False)
 
         # Get back the poses
-        poses_local = rearrange(poses_features,
-                                "... (joints xyz) -> ... joints xyz",
-                                xyz=3)
+        poses_local = rearrange(
+            poses_features, "... (joints xyz) -> ... joints xyz", xyz=3
+        )
 
         # Rotate the poses
-        poses = torch.einsum("...lj,...jk->...lk", poses_local[..., [0, 2]],
-                             rotations)
+        poses = torch.einsum("...lj,...jk->...lk", poses_local[..., [0, 2]], rotations)
         poses = torch.stack(
-            (poses[..., 0], poses_local[..., 1], poses[..., 1]), axis=-1)
+            (poses[..., 0], poses_local[..., 1], poses[..., 1]), axis=-1
+        )
 
         # Rotate the vel_trajectory
-        vel_trajectory = torch.einsum("...j,...jk->...k", vel_trajectory_local,
-                                      rotations)
+        vel_trajectory = torch.einsum(
+            "...j,...jk->...k", vel_trajectory_local, rotations
+        )
         # Integrate the trajectory
         # Already have the good dimensionality
         trajectory = torch.cumsum(vel_trajectory, dim=-2)

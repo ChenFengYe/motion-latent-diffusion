@@ -9,21 +9,24 @@ from .renderer import get_renderer
 def get_rotation(theta=np.pi / 3):
     import mld.utils.rotation_conversions as geometry
     import torch
+
     axis = torch.tensor([0, 1, 0], dtype=torch.float)
     axisangle = theta * axis
     matrix = geometry.axis_angle_to_matrix(axisangle)
     return matrix.numpy()
 
 
-def render_video(meshes,
-                 key,
-                 action,
-                 renderer,
-                 savepath,
-                 backgrounds,
-                 cam_pose,
-                 cams=(0.75, 0.75, 0, 0.10),
-                 color=[0.11, 0.53, 0.8]):
+def render_video(
+    meshes,
+    key,
+    action,
+    renderer,
+    savepath,
+    backgrounds,
+    cam_pose,
+    cams=(0.75, 0.75, 0, 0.10),
+    color=[0.11, 0.53, 0.8],
+):
     #  cams=(0.75, 0.75, 0, 0.10), color=[165.0/255,112/255,140/255]):
     # center the first frame
     if key not in ["real", "ntf", "side"]:
@@ -31,8 +34,7 @@ def render_video(meshes,
         # purpole to green
         # color = w*np.array([0.9,102/255,120/255]) + (1-w)*np.array([0.11, 0.9, 0.11])
         # color = (1-w)*np.array([165.0/255,112/255,140/255]) + w*np.array([0.11, 0.8, 0.11])
-        color = (1 - w) * np.array([0.75, 0.13, 0.7]) + w * np.array(
-            [0.12, 0.7, 0.14])
+        color = (1 - w) * np.array([0.75, 0.13, 0.7]) + w * np.array([0.12, 0.7, 0.14])
 
     meshes = meshes - meshes[0].mean(axis=0)
     imgs = []
@@ -49,11 +51,7 @@ def render_video(meshes,
             cam = cams[idx]
             idx += 1
         # prepare cams
-        img = renderer.render(background,
-                              mesh,
-                              cam,
-                              color=color,
-                              cam_pose=cam_pose)
+        img = renderer.render(background, mesh, cam, color=color, cam_pose=cam_pose)
         imgs.append(img)
         # show(img)
 
@@ -91,15 +89,12 @@ def main():
         output = {
             "visualization": visualization,
             "generation": generation,
-            "reconstruction": reconstruction
+            "reconstruction": reconstruction,
         }
     else:
         # output = {f"generation_{key}": output[key] for key in range(2)} #  len(output))}
         # output = {f"generation_{key}": output[key] for key in range(len(output))}
-        output = {
-            f"generation_{key}": output[key]
-            for key in range(len(output))
-        }
+        output = {f"generation_{key}": output[key] for key in range(len(output))}
 
     width = 1024
     height = 1024
@@ -125,8 +120,7 @@ def main():
         vidmeshes = output[key]
         for action in range(len(vidmeshes)):
             meshes = vidmeshes[action].transpose(2, 0, 1)
-            path = os.path.join(savefolder,
-                                "action{}_{}.mp4".format(action, key))
+            path = os.path.join(savefolder, "action{}_{}.mp4".format(action, key))
             render_video(meshes, key, action, renderer, path, background)
 
 

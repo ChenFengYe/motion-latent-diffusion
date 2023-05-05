@@ -8,30 +8,30 @@ logger = logging.getLogger()
 
 
 class ProgressLogger(Callback):
-
     def __init__(self, metric_monitor: dict, precision: int = 3):
         # Metric to monitor
         self.metric_monitor = metric_monitor
         self.precision = precision
 
-    def on_train_start(self, trainer: Trainer, pl_module: LightningModule,
-                       **kwargs) -> None:
+    def on_train_start(
+        self, trainer: Trainer, pl_module: LightningModule, **kwargs
+    ) -> None:
         logger.info("Training started")
 
-    def on_train_end(self, trainer: Trainer, pl_module: LightningModule,
-                     **kwargs) -> None:
+    def on_train_end(
+        self, trainer: Trainer, pl_module: LightningModule, **kwargs
+    ) -> None:
         logger.info("Training done")
 
-    def on_validation_epoch_end(self, trainer: Trainer,
-                                pl_module: LightningModule, **kwargs) -> None:
+    def on_validation_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule, **kwargs
+    ) -> None:
         if trainer.sanity_checking:
             logger.info("Sanity checking ok.")
 
-    def on_train_epoch_end(self,
-                           trainer: Trainer,
-                           pl_module: LightningModule,
-                           padding=False,
-                           **kwargs) -> None:
+    def on_train_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule, padding=False, **kwargs
+    ) -> None:
         metric_format = f"{{:.{self.precision}e}}"
         line = f"Epoch {trainer.current_epoch}"
         if padding:

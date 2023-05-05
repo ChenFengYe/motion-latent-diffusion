@@ -24,12 +24,10 @@ def get_mean_std(phase, cfg, dataset_name):
     assert name in ["t2m", "kit"]
     # if phase in ["train", "val", "test"]:
     if phase in ["val"]:
-        if name == 't2m':
-            data_root = pjoin(cfg.model.t2m_path, name, "Comp_v6_KLD01",
-                              "meta")
-        elif name == 'kit':
-            data_root = pjoin(cfg.model.t2m_path, name, "Comp_v6_KLD005",
-                              "meta")
+        if name == "t2m":
+            data_root = pjoin(cfg.model.t2m_path, name, "Comp_v6_KLD01", "meta")
+        elif name == "kit":
+            data_root = pjoin(cfg.model.t2m_path, name, "Comp_v6_KLD005", "meta")
         else:
             raise ValueError("Only support t2m and kit")
         mean = np.load(pjoin(data_root, "mean.npy"))
@@ -55,7 +53,7 @@ def get_WordVectorizer(cfg, phase, dataset_name):
 def get_collate_fn(name, phase="train"):
     if name.lower() in ["humanml3d", "kit"]:
         return mld_collate
-    elif name.lower() in ["humanact12", 'uestc']:
+    elif name.lower() in ["humanact12", "uestc"]:
         return a2m_collate
     # else:
     #     return all_collate
@@ -105,11 +103,10 @@ def get_datasets(cfg, logger=None, phase="train"):
                 max_motion_length=cfg.DATASET.SAMPLER.MAX_LEN,
                 min_motion_length=cfg.DATASET.SAMPLER.MIN_LEN,
                 max_text_len=cfg.DATASET.SAMPLER.MAX_TEXT_LEN,
-                unit_length=eval(
-                    f"cfg.DATASET.{dataset_name.upper()}.UNIT_LEN"),
+                unit_length=eval(f"cfg.DATASET.{dataset_name.upper()}.UNIT_LEN"),
             )
             datasets.append(dataset)
-        elif dataset_name.lower() in ["humanact12", 'uestc']:
+        elif dataset_name.lower() in ["humanact12", "uestc"]:
             # get collect_fn
             collate_fn = get_collate_fn(dataset_name, phase)
             # get dataset module
@@ -126,10 +123,10 @@ def get_datasets(cfg, logger=None, phase="train"):
                 pose_rep=cfg.DATASET.HUMANACT12.POSE_REP,
                 max_len=cfg.DATASET.SAMPLER.MAX_LEN,
                 min_len=cfg.DATASET.SAMPLER.MIN_LEN,
-                num_seq_max=cfg.DATASET.SAMPLER.MAX_SQE
-                if not cfg.DEBUG else 100,
+                num_seq_max=cfg.DATASET.SAMPLER.MAX_SQE if not cfg.DEBUG else 100,
                 glob=cfg.DATASET.HUMANACT12.GLOB,
-                translation=cfg.DATASET.HUMANACT12.TRANSLATION)
+                translation=cfg.DATASET.HUMANACT12.TRANSLATION,
+            )
             cfg.DATASET.NCLASSES = dataset.nclasses
             datasets.append(dataset)
         elif dataset_name.lower() in ["amass"]:

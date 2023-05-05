@@ -14,7 +14,7 @@ from .vertices import prepare_vertices
 
 
 def prune_begin_end(data, perc):
-    to_remove = int(len(data)*perc)
+    to_remove = int(len(data) * perc)
     if to_remove == 0:
         return data
     return data[to_remove:-to_remove]
@@ -25,15 +25,35 @@ def render_current_frame(path):
     bpy.ops.render.render(use_viewport=True, write_still=True)
 
 
-
-def render(npydata, frames_folder, *, mode, faces_path, gt=False,
-           exact_frame=None, num=8, downsample=True,
-           canonicalize=True, always_on_floor=False, denoising=True,
-           oldrender=True,jointstype="mmm", res="high", init=True,
-           accelerator='gpu',device=[0]):
+def render(
+    npydata,
+    frames_folder,
+    *,
+    mode,
+    faces_path,
+    gt=False,
+    exact_frame=None,
+    num=8,
+    downsample=True,
+    canonicalize=True,
+    always_on_floor=False,
+    denoising=True,
+    oldrender=True,
+    jointstype="mmm",
+    res="high",
+    init=True,
+    accelerator="gpu",
+    device=[0],
+):
     if init:
         # Setup the scene (lights / render engine / resolution etc)
-        setup_scene(res=res, denoising=denoising, oldrender=oldrender,accelerator=accelerator,device=device)
+        setup_scene(
+            res=res,
+            denoising=denoising,
+            oldrender=oldrender,
+            accelerator=accelerator,
+            device=device,
+        )
 
     is_mesh = mesh_detect(npydata)
 
@@ -66,16 +86,26 @@ def render(npydata, frames_folder, *, mode, faces_path, gt=False,
 
     if is_mesh:
         from .meshes import Meshes
-        data = Meshes(npydata, gt=gt, mode=mode,
-                      faces_path=faces_path,
-                      canonicalize=canonicalize,
-                      always_on_floor=always_on_floor)
+
+        data = Meshes(
+            npydata,
+            gt=gt,
+            mode=mode,
+            faces_path=faces_path,
+            canonicalize=canonicalize,
+            always_on_floor=always_on_floor,
+        )
     else:
         from .joints import Joints
-        data = Joints(npydata, gt=gt, mode=mode,
-                      canonicalize=canonicalize,
-                      always_on_floor=always_on_floor,
-                      jointstype=jointstype)
+
+        data = Joints(
+            npydata,
+            gt=gt,
+            mode=mode,
+            canonicalize=canonicalize,
+            always_on_floor=always_on_floor,
+            jointstype=jointstype,
+        )
 
     # Number of frames possible to render
     nframes = len(data)
@@ -89,9 +119,9 @@ def render(npydata, frames_folder, *, mode, faces_path, gt=False,
     # initialize the camera
     camera = Camera(first_root=data.get_root(0), mode=mode, is_mesh=is_mesh)
 
-    frameidx = get_frameidx(mode=mode, nframes=nframes,
-                            exact_frame=exact_frame,
-                            frames_to_keep=num)
+    frameidx = get_frameidx(
+        mode=mode, nframes=nframes, exact_frame=exact_frame, frames_to_keep=num
+    )
 
     nframes_to_render = len(frameidx)
 
@@ -102,13 +132,13 @@ def render(npydata, frames_folder, *, mode, faces_path, gt=False,
     imported_obj_names = []
     for index, frameidx in enumerate(frameidx):
         if mode == "sequence":
-            frac = index / (nframes_to_render-1)
+            frac = index / (nframes_to_render - 1)
             mat = data.get_sequence_mat(frac)
         else:
             mat = data.mat
             camera.update(data.get_root(frameidx))
 
-        islast = index == (nframes_to_render-1)
+        islast = index == (nframes_to_render - 1)
 
         objname = data.load_in_blender(frameidx, mat)
         name = f"{str(index).zfill(4)}"

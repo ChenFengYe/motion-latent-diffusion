@@ -2,9 +2,9 @@ from dataclasses import dataclass, fields
 
 
 class Transform:
-
     def collate(self, lst_datastruct):
         from mld.datasets.utils import collate_tensor_with_padding
+
         example = lst_datastruct[0]
 
         def collate_or_none(key):
@@ -22,7 +22,6 @@ class Transform:
 # need to define "datakeys" and transforms
 @dataclass
 class Datastruct:
-
     def __getitem__(self, key):
         return getattr(self, key)
 
@@ -58,7 +57,6 @@ class Datastruct:
         return self[self.datakeys[0]].device
 
     def detach(self):
-
         def detach_or_none(tensor):
             if tensor is not None:
                 return tensor.detach()

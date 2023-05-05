@@ -15,9 +15,21 @@ GEN_SMPL = body_material(0.658, 0.214, 0.0114)
 
 
 class Meshes:
-    def __init__(self, data, *, gt, mode, faces_path, canonicalize, always_on_floor, oldrender=True, **kwargs):
-        data = prepare_meshes(data, canonicalize=canonicalize,
-                              always_on_floor=always_on_floor)
+    def __init__(
+        self,
+        data,
+        *,
+        gt,
+        mode,
+        faces_path,
+        canonicalize,
+        always_on_floor,
+        oldrender=True,
+        **kwargs,
+    ):
+        data = prepare_meshes(
+            data, canonicalize=canonicalize, always_on_floor=always_on_floor
+        )
 
         self.faces = np.load(faces_path)
         print(faces_path)
@@ -35,13 +47,14 @@ class Meshes:
 
     def get_sequence_mat(self, frac):
         import matplotlib
+
         # cmap = matplotlib.cm.get_cmap('Blues')
-        cmap = matplotlib.cm.get_cmap('Oranges')
+        cmap = matplotlib.cm.get_cmap("Oranges")
         # begin = 0.60
         # end = 0.90
         begin = 0.50
         end = 0.90
-        rgbcolor = cmap(begin + (end-begin)*frac)
+        rgbcolor = cmap(begin + (end - begin) * frac)
         mat = body_material(*rgbcolor, oldrender=self.oldrender)
         return mat
 
@@ -57,6 +70,7 @@ class Meshes:
         name = f"{str(index).zfill(4)}"
 
         from .tools import load_numpy_vertices_into_blender
+
         load_numpy_vertices_into_blender(vertices, faces, name, mat)
 
         return name

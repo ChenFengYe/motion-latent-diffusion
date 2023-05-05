@@ -43,8 +43,10 @@ def main():
     # create logger
     logger = create_logger(cfg, phase="test")
     output_dir = Path(
-        os.path.join(cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME),
-                     "samples_" + cfg.TIME))
+        os.path.join(
+            cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME), "samples_" + cfg.TIME
+        )
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info(OmegaConf.to_yaml(cfg))
 
@@ -60,13 +62,11 @@ def main():
 
     # create dataset
     datasets = get_datasets(cfg, logger=logger, phase="test")[0]
-    logger.info("datasets module {} initialized".format("".join(
-        cfg.TRAIN.DATASETS)))
+    logger.info("datasets module {} initialized".format("".join(cfg.TRAIN.DATASETS)))
 
     # create model
     model = get_model(cfg, datasets)
     logger.info("model {} loaded".format(cfg.model.model_type))
-    
 
     # optimizer
     metric_monitor = {
@@ -106,8 +106,7 @@ def main():
     # loading state dict
     logger.info("Loading checkpoints from {}".format(cfg.TEST.CHECKPOINTS))
 
-    state_dict = torch.load(cfg.TEST.CHECKPOINTS,
-                            map_location="cpu")["state_dict"]
+    state_dict = torch.load(cfg.TEST.CHECKPOINTS, map_location="cpu")["state_dict"]
     model.load_state_dict(state_dict)
 
     all_metrics = {}
@@ -133,8 +132,7 @@ def main():
     # metrics = trainer.validate(model, datamodule=datasets[0])
     all_metrics_new = {}
     for key, item in all_metrics.items():
-        mean, conf_interval = get_metric_statistics(np.array(item),
-                                                    replication_times)
+        mean, conf_interval = get_metric_statistics(np.array(item), replication_times)
         all_metrics_new[key + "/mean"] = mean
         all_metrics_new[key + "/conf_interval"] = conf_interval
     print_table(f"Mean Metrics", all_metrics_new)

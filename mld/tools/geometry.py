@@ -43,10 +43,10 @@ def matrix_of_angles(cos, sin, inv=False, dim=2):
         row2 = torch.stack((sin, cos), axis=-1)
         return torch.stack((row1, row2), axis=-2)
     elif dim == 3:
-        row1 = torch.stack((cos, -sin, 0*cos), axis=-1)
-        row2 = torch.stack((sin, cos, 0*cos), axis=-1)
-        row3 = torch.stack((0*sin, 0*cos, 1+0*cos), axis=-1)
-        return torch.stack((row1, row2, row3),axis=-2)
+        row1 = torch.stack((cos, -sin, 0 * cos), axis=-1)
+        row2 = torch.stack((sin, cos, 0 * cos), axis=-1)
+        row3 = torch.stack((0 * sin, 0 * cos, 1 + 0 * cos), axis=-1)
+        return torch.stack((row1, row2, row3), axis=-2)
 
 
 def quaternion_to_matrix(quaternions):

@@ -12,21 +12,22 @@ _EPS4 = np.finfo(float).eps * 4.0
 
 _FLOAT_EPS = np.finfo(np.float64).eps
 
+
 # PyTorch-backed implementations
 def qinv(q):
-    assert q.shape[-1] == 4, 'q must be a tensor of shape (*, 4)'
+    assert q.shape[-1] == 4, "q must be a tensor of shape (*, 4)"
     mask = torch.ones_like(q)
     mask[..., 1:] = -mask[..., 1:]
     return q * mask
 
 
 def qinv_np(q):
-    assert q.shape[-1] == 4, 'q must be a tensor of shape (*, 4)'
+    assert q.shape[-1] == 4, "q must be a tensor of shape (*, 4)"
     return qinv(torch.from_numpy(q).float()).numpy()
 
 
 def qnormalize(q):
-    assert q.shape[-1] == 4, 'q must be a tensor of shape (*, 4)'
+    assert q.shape[-1] == 4, "q must be a tensor of shape (*, 4)"
     return q / torch.norm(q, dim=-1, keepdim=True)
 
 
@@ -90,27 +91,27 @@ def qeuler(q, order, epsilon=0, deg=True):
     q2 = q[:, 2]
     q3 = q[:, 3]
 
-    if order == 'xyz':
+    if order == "xyz":
         x = torch.atan2(2 * (q0 * q1 - q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
         y = torch.asin(torch.clamp(2 * (q1 * q3 + q0 * q2), -1 + epsilon, 1 - epsilon))
         z = torch.atan2(2 * (q0 * q3 - q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
-    elif order == 'yzx':
+    elif order == "yzx":
         x = torch.atan2(2 * (q0 * q1 - q2 * q3), 1 - 2 * (q1 * q1 + q3 * q3))
         y = torch.atan2(2 * (q0 * q2 - q1 * q3), 1 - 2 * (q2 * q2 + q3 * q3))
         z = torch.asin(torch.clamp(2 * (q1 * q2 + q0 * q3), -1 + epsilon, 1 - epsilon))
-    elif order == 'zxy':
+    elif order == "zxy":
         x = torch.asin(torch.clamp(2 * (q0 * q1 + q2 * q3), -1 + epsilon, 1 - epsilon))
         y = torch.atan2(2 * (q0 * q2 - q1 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
         z = torch.atan2(2 * (q0 * q3 - q1 * q2), 1 - 2 * (q1 * q1 + q3 * q3))
-    elif order == 'xzy':
+    elif order == "xzy":
         x = torch.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q3 * q3))
         y = torch.atan2(2 * (q0 * q2 + q1 * q3), 1 - 2 * (q2 * q2 + q3 * q3))
         z = torch.asin(torch.clamp(2 * (q0 * q3 - q1 * q2), -1 + epsilon, 1 - epsilon))
-    elif order == 'yxz':
+    elif order == "yxz":
         x = torch.asin(torch.clamp(2 * (q0 * q1 - q2 * q3), -1 + epsilon, 1 - epsilon))
         y = torch.atan2(2 * (q1 * q3 + q0 * q2), 1 - 2 * (q1 * q1 + q2 * q2))
         z = torch.atan2(2 * (q1 * q2 + q0 * q3), 1 - 2 * (q1 * q1 + q3 * q3))
-    elif order == 'zyx':
+    elif order == "zyx":
         x = torch.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
         y = torch.asin(torch.clamp(2 * (q0 * q2 - q1 * q3), -1 + epsilon, 1 - epsilon))
         z = torch.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
@@ -124,6 +125,7 @@ def qeuler(q, order, epsilon=0, deg=True):
 
 
 # Numpy-backed implementations
+
 
 def qmul_np(q, r):
     q = torch.from_numpy(q).contiguous().float()
@@ -179,23 +181,32 @@ def euler2quat(e, order, deg=True):
 
     ## if euler angles in degrees
     if deg:
-        e = e * np.pi / 180.
+        e = e * np.pi / 180.0
 
     x = e[:, 0]
     y = e[:, 1]
     z = e[:, 2]
 
-    rx = torch.stack((torch.cos(x / 2), torch.sin(x / 2), torch.zeros_like(x), torch.zeros_like(x)), dim=1)
-    ry = torch.stack((torch.cos(y / 2), torch.zeros_like(y), torch.sin(y / 2), torch.zeros_like(y)), dim=1)
-    rz = torch.stack((torch.cos(z / 2), torch.zeros_like(z), torch.zeros_like(z), torch.sin(z / 2)), dim=1)
+    rx = torch.stack(
+        (torch.cos(x / 2), torch.sin(x / 2), torch.zeros_like(x), torch.zeros_like(x)),
+        dim=1,
+    )
+    ry = torch.stack(
+        (torch.cos(y / 2), torch.zeros_like(y), torch.sin(y / 2), torch.zeros_like(y)),
+        dim=1,
+    )
+    rz = torch.stack(
+        (torch.cos(z / 2), torch.zeros_like(z), torch.zeros_like(z), torch.sin(z / 2)),
+        dim=1,
+    )
 
     result = None
     for coord in order:
-        if coord == 'x':
+        if coord == "x":
             r = rx
-        elif coord == 'y':
+        elif coord == "y":
             r = ry
-        elif coord == 'z':
+        elif coord == "z":
             r = rz
         else:
             raise
@@ -205,7 +216,7 @@ def euler2quat(e, order, deg=True):
             result = qmul(result, r)
 
     # Reverse antipodal representation to have a non-negative "w"
-    if order in ['xyz', 'yzx', 'zxy']:
+    if order in ["xyz", "yzx", "zxy"]:
         result *= -1
 
     return result.view(original_shape)
@@ -245,17 +256,23 @@ def euler_to_quaternion(e, order):
     y = e[:, 1]
     z = e[:, 2]
 
-    rx = np.stack((np.cos(x / 2), np.sin(x / 2), np.zeros_like(x), np.zeros_like(x)), axis=1)
-    ry = np.stack((np.cos(y / 2), np.zeros_like(y), np.sin(y / 2), np.zeros_like(y)), axis=1)
-    rz = np.stack((np.cos(z / 2), np.zeros_like(z), np.zeros_like(z), np.sin(z / 2)), axis=1)
+    rx = np.stack(
+        (np.cos(x / 2), np.sin(x / 2), np.zeros_like(x), np.zeros_like(x)), axis=1
+    )
+    ry = np.stack(
+        (np.cos(y / 2), np.zeros_like(y), np.sin(y / 2), np.zeros_like(y)), axis=1
+    )
+    rz = np.stack(
+        (np.cos(z / 2), np.zeros_like(z), np.zeros_like(z), np.sin(z / 2)), axis=1
+    )
 
     result = None
     for coord in order:
-        if coord == 'x':
+        if coord == "x":
             r = rx
-        elif coord == 'y':
+        elif coord == "y":
             r = ry
-        elif coord == 'z':
+        elif coord == "z":
             r = rz
         else:
             raise
@@ -265,7 +282,7 @@ def euler_to_quaternion(e, order):
             result = qmul_np(result, r)
 
     # Reverse antipodal representation to have a non-negative "w"
-    if order in ['xyz', 'yzx', 'zxy']:
+    if order in ["xyz", "yzx", "zxy"]:
         result *= -1
 
     return result.reshape(original_shape)
@@ -342,9 +359,9 @@ def cont6d_to_matrix_np(cont6d):
 
 
 def qpow(q0, t, dtype=torch.float):
-    ''' q0 : tensor of quaternions
+    """q0 : tensor of quaternions
     t: tensor of powers
-    '''
+    """
     q0 = qnormalize(q0)
     theta0 = torch.acos(q0[..., 0])
 
@@ -367,42 +384,48 @@ def qpow(q0, t, dtype=torch.float):
 
 
 def qslerp(q0, q1, t):
-    '''
+    """
     q0: starting quaternion
     q1: ending quaternion
     t: array of points along the way
 
     Returns:
     Tensor of Slerps: t.shape + q0.shape
-    '''
+    """
 
     q0 = qnormalize(q0)
     q1 = qnormalize(q1)
     q_ = qpow(qmul(q1, qinv(q0)), t)
 
-    return qmul(q_,
-                q0.contiguous().view(torch.Size([1] * len(t.shape)) + q0.shape).expand(t.shape + q0.shape).contiguous())
+    return qmul(
+        q_,
+        q0.contiguous()
+        .view(torch.Size([1] * len(t.shape)) + q0.shape)
+        .expand(t.shape + q0.shape)
+        .contiguous(),
+    )
 
 
 def qbetween(v0, v1):
-    '''
+    """
     find the quaternion used to rotate v0 to v1
-    '''
-    assert v0.shape[-1] == 3, 'v0 must be of the shape (*, 3)'
-    assert v1.shape[-1] == 3, 'v1 must be of the shape (*, 3)'
+    """
+    assert v0.shape[-1] == 3, "v0 must be of the shape (*, 3)"
+    assert v1.shape[-1] == 3, "v1 must be of the shape (*, 3)"
 
     v = torch.cross(v0, v1)
-    w = torch.sqrt((v0 ** 2).sum(dim=-1, keepdim=True) * (v1 ** 2).sum(dim=-1, keepdim=True)) + (v0 * v1).sum(dim=-1,
-                                                                                                              keepdim=True)
+    w = torch.sqrt(
+        (v0**2).sum(dim=-1, keepdim=True) * (v1**2).sum(dim=-1, keepdim=True)
+    ) + (v0 * v1).sum(dim=-1, keepdim=True)
     return qnormalize(torch.cat([w, v], dim=-1))
 
 
 def qbetween_np(v0, v1):
-    '''
+    """
     find the quaternion used to rotate v0 to v1
-    '''
-    assert v0.shape[-1] == 3, 'v0 must be of the shape (*, 3)'
-    assert v1.shape[-1] == 3, 'v1 must be of the shape (*, 3)'
+    """
+    assert v0.shape[-1] == 3, "v0 must be of the shape (*, 3)"
+    assert v1.shape[-1] == 3, "v1 must be of the shape (*, 3)"
 
     v0 = torch.from_numpy(v0).float()
     v1 = torch.from_numpy(v1).float()

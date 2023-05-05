@@ -11,12 +11,9 @@ from .utils import *
 class UncondMetrics(Metric):
     full_state_update = True
 
-    def __init__(self,
-                 top_k=3,
-                 R_size=32,
-                 diversity_times=300,
-                 dist_sync_on_step=True,
-                 **kwargs):
+    def __init__(
+        self, top_k=3, R_size=32, diversity_times=300, dist_sync_on_step=True, **kwargs
+    ):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
         self.name = "fid, kid, and diversity scores"
@@ -26,31 +23,21 @@ class UncondMetrics(Metric):
         self.diversity_times = 300
 
         self.add_state("count", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("count_seq",
-                       default=torch.tensor(0),
-                       dist_reduce_fx="sum")
+        self.add_state("count_seq", default=torch.tensor(0), dist_reduce_fx="sum")
 
         self.metrics = []
 
         # KID
-        self.add_state("KID_mean",
-                       default=torch.tensor(0.0),
-                       dist_reduce_fx="mean")
-        self.add_state("KID_std",
-                       default=torch.tensor(0.0),
-                       dist_reduce_fx="mean")
+        self.add_state("KID_mean", default=torch.tensor(0.0), dist_reduce_fx="mean")
+        self.add_state("KID_std", default=torch.tensor(0.0), dist_reduce_fx="mean")
         self.metrics.extend(["KID_mean", "KID_std"])
         # Fid
         self.add_state("FID", default=torch.tensor(0.0), dist_reduce_fx="mean")
         self.metrics.append("FID")
 
         # Diversity
-        self.add_state("Diversity",
-                       default=torch.tensor(0.0),
-                       dist_reduce_fx="sum")
-        self.add_state("gt_Diversity",
-                       default=torch.tensor(0.0),
-                       dist_reduce_fx="sum")
+        self.add_state("Diversity", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("gt_Diversity", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.metrics.extend(["Diversity", "gt_Diversity"])
 
         # chached batches
@@ -92,10 +79,12 @@ class UncondMetrics(Metric):
         assert count_seq > self.diversity_times
         print(all_genmotions.shape)
         print(all_gtmotions.shape)
-        metrics["Diversity"] = calculate_diversity_np(all_genmotions,
-                                                      self.diversity_times)
+        metrics["Diversity"] = calculate_diversity_np(
+            all_genmotions, self.diversity_times
+        )
         metrics["gt_Diversity"] = calculate_diversity_np(
-            all_gtmotions, self.diversity_times)
+            all_gtmotions, self.diversity_times
+        )
 
         return {**metrics}
 
@@ -110,11 +99,11 @@ class UncondMetrics(Metric):
 
         # [bs, nlatent*ndim] <= [bs, nlatent, ndim]
         if recmotion_embeddings is not None:
-            recmotion_embeddings = torch.flatten(recmotion_embeddings,
-                                                 start_dim=1).detach()
+            recmotion_embeddings = torch.flatten(
+                recmotion_embeddings, start_dim=1
+            ).detach()
             # store all texts and motions
             self.recmotion_embeddings.append(recmotion_embeddings)
-        gtmotion_embeddings = torch.flatten(gtmotion_embeddings,
-                                            start_dim=1).detach()
+        gtmotion_embeddings = torch.flatten(gtmotion_embeddings, start_dim=1).detach()
 
         self.gtmotion_embeddings.append(gtmotion_embeddings)

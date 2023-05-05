@@ -22,7 +22,7 @@ class TemosLosses(Metric):
     'gen_loss_twist': l_tw,
     'gen_loss_triplet': l_triplet,
     'gen_loss_joint': l_joint,
-           
+
     """
 
     def __init__(self, vae, mode, cfg):
@@ -85,64 +85,60 @@ class TemosLosses(Metric):
         self._params = {}
 
         for loss in losses:
-            if loss != 'total':
-                if loss.split('_')[0] == 'kl':
+            if loss != "total":
+                if loss.split("_")[0] == "kl":
                     self._losses_func[loss] = KLLoss()
                     self._params[loss] = cfg.LOSS.LAMBDA_KL
-                elif loss.split('_')[0] == 'recons':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(
-                        reduction='mean')
+                elif loss.split("_")[0] == "recons":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_REC
-                elif loss.split('_')[0] == 'latent':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(
-                        reduction='mean')
+                elif loss.split("_")[0] == "latent":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_LATENT
-                elif loss.split('_')[0] == 'cycle':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(
-                        reduction='mean')
+                elif loss.split("_")[0] == "cycle":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_CYCLE
                 else:
                     ValueError("This loss is not recognized.")
 
-    def update(self,
-               f_text=None,
-               f_motion=None,
-               f_ref=None,
-               lat_text=None,
-               lat_motion=None,
-               dis_text=None,
-               dis_motion=None,
-               dis_ref=None):
+    def update(
+        self,
+        f_text=None,
+        f_motion=None,
+        f_ref=None,
+        lat_text=None,
+        lat_motion=None,
+        dis_text=None,
+        dis_motion=None,
+        dis_ref=None,
+    ):
         total: float = 0.0
 
         if self.mode == "xyz" or self.force_loss_on_jfeats:
             if not self.ablation_no_motionencoder:
-                total += self._update_loss("recons_jfeats2jfeats", f_motion,
-                                           f_ref)
+                total += self._update_loss("recons_jfeats2jfeats", f_motion, f_ref)
             total += self._update_loss("recons_text2jfeats", f_text, f_ref)
 
         if self.mode == "smpl":
             if not self.ablation_no_motionencoder:
-                total += self._update_loss("recons_rfeats2rfeats",
-                                           f_motion.rfeats, f_ref.rfeats)
-            total += self._update_loss("recons_text2rfeats", f_text.rfeats,
-                                       f_ref.rfeats)
+                total += self._update_loss(
+                    "recons_rfeats2rfeats", f_motion.rfeats, f_ref.rfeats
+                )
+            total += self._update_loss(
+                "recons_text2rfeats", f_text.rfeats, f_ref.rfeats
+            )
 
         if self.vae or self.loss_on_both:
             if not self.ablation_no_kl_combine and not self.ablation_no_motionencoder:
-                total += self._update_loss("kl_text2motion", dis_text,
-                                           dis_motion)
-                total += self._update_loss("kl_motion2text", dis_motion,
-                                           dis_text)
+                total += self._update_loss("kl_text2motion", dis_text, dis_motion)
+                total += self._update_loss("kl_motion2text", dis_motion, dis_text)
             if not self.ablation_no_kl_gaussian:
                 total += self._update_loss("kl_text", dis_text, dis_ref)
                 if not self.ablation_no_motionencoder:
-                    total += self._update_loss("kl_motion", dis_motion,
-                                               dis_ref)
+                    total += self._update_loss("kl_motion", dis_motion, dis_ref)
         if not self.vae or self.loss_on_both:
             if not self.ablation_no_motionencoder:
-                total += self._update_loss("latent_manifold", lat_text,
-                                           lat_motion)
+                total += self._update_loss("latent_manifold", lat_text, lat_motion)
 
         self.total += total.detach()
         self.count += 1
@@ -171,7 +167,6 @@ class TemosLosses(Metric):
 
 
 class KLLoss:
-
     def __init__(self):
         pass
 
@@ -184,7 +179,6 @@ class KLLoss:
 
 
 class KLLossMulti:
-
     def __init__(self):
         self.klloss = KLLoss()
 

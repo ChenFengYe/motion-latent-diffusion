@@ -56,7 +56,7 @@ def render_cli() -> None:
         # random begin for parallel
         file_list = natsort.natsorted(os.listdir(cfg.RENDER.DIR))
         begin_id = random.randrange(0, len(file_list))
-        file_list = file_list[begin_id:]+file_list[:begin_id]
+        file_list = file_list[begin_id:] + file_list[:begin_id]
 
         # render mesh npy first
         for item in file_list:
@@ -75,11 +75,14 @@ def render_cli() -> None:
     from mld.render.blender import render
     from mld.render.blender.tools import mesh_detect
     from mld.render.video import Video
+
     init = True
     for path in paths:
         # check existed mp4 or under rendering
         if cfg.RENDER.MODE == "video":
-            if os.path.exists(path.replace(".npy", ".mp4")) or os.path.exists(path.replace(".npy", "_frames")):
+            if os.path.exists(path.replace(".npy", ".mp4")) or os.path.exists(
+                path.replace(".npy", "_frames")
+            ):
                 print(f"npy is rendered or under rendering {path}")
                 continue
         else:
@@ -90,11 +93,13 @@ def render_cli() -> None:
 
         if cfg.RENDER.MODE == "video":
             frames_folder = os.path.join(
-                output_dir, path.replace(".npy", "_frames").split('/')[-1])
+                output_dir, path.replace(".npy", "_frames").split("/")[-1]
+            )
             os.makedirs(frames_folder, exist_ok=True)
         else:
             frames_folder = os.path.join(
-                output_dir, path.replace(".npy", ".png").split('/')[-1])
+                output_dir, path.replace(".npy", ".png").split("/")[-1]
+            )
 
         try:
             data = np.load(path)

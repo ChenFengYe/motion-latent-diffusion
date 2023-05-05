@@ -3,7 +3,7 @@ import bpy
 
 class Camera:
     def __init__(self, *, first_root, mode, is_mesh):
-        camera = bpy.data.objects['Camera']
+        camera = bpy.data.objects["Camera"]
 
         ## initial position
         camera.location.x = 7.36

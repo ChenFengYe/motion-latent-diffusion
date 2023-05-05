@@ -11,14 +11,15 @@ from .base import Rots2Rfeats
 
 
 class SMPLVelP(Rots2Rfeats):
-
-    def __init__(self,
-                 path: Optional[str] = None,
-                 normalization: bool = False,
-                 pose_rep: str = "rot6d",
-                 canonicalize: bool = False,
-                 offset: bool = True,
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        path: Optional[str] = None,
+        normalization: bool = False,
+        pose_rep: str = "rot6d",
+        canonicalize: bool = False,
+        offset: bool = True,
+        **kwargs
+    ) -> None:
         super().__init__(path=path, normalization=normalization)
         self.canonicalize = canonicalize
         self.pose_rep = pose_rep
@@ -38,7 +39,8 @@ class SMPLVelP(Rots2Rfeats):
         vel_trajectory = torch.diff(trajectory, dim=-2)
         # 0 for the first one => keep the dimentionality
         vel_trajectory = torch.cat(
-            (0 * vel_trajectory[..., [0], :], vel_trajectory), dim=-2)
+            (0 * vel_trajectory[..., [0], :], vel_trajectory), dim=-2
+        )
 
         # first normalize the data
         if self.canonicalize:
@@ -56,22 +58,26 @@ class SMPLVelP(Rots2Rfeats):
             rot2d = geometry.axis_angle_to_matrix(rot2d)
 
             # turn with the same amount all the rotations
-            global_orient = torch.einsum("...kj,...kl->...jl", rot2d,
-                                         global_orient)
+            global_orient = torch.einsum("...kj,...kl->...jl", rot2d, global_orient)
 
             matrix_poses = torch.cat(
-                (global_orient[..., None, :, :], matrix_poses[..., 1:, :, :]),
-                dim=-3)
+                (global_orient[..., None, :, :], matrix_poses[..., 1:, :, :]), dim=-3
+            )
 
             # Turn the trajectory as well
-            vel_trajectory = torch.einsum("...kj,...lk->...lj",
-                                          rot2d[..., :2, :2], vel_trajectory)
+            vel_trajectory = torch.einsum(
+                "...kj,...lk->...lj", rot2d[..., :2, :2], vel_trajectory
+            )
 
         poses = matrix_to(self.pose_rep, matrix_poses)
         features = torch.cat(
-            (root_y[..., None], vel_trajectory,
-             rearrange(poses, "... joints rot -> ... (joints rot)")),
-            dim=-1)
+            (
+                root_y[..., None],
+                vel_trajectory,
+                rearrange(poses, "... joints rot -> ... (joints rot)"),
+            ),
+            dim=-1,
+        )
         features = self.normalize(features)
         return features
 
@@ -79,9 +85,9 @@ class SMPLVelP(Rots2Rfeats):
         root_y = features[..., 0]
         vel_trajectory = features[..., 1:3]
         poses_features = features[..., 3:]
-        poses = rearrange(poses_features,
-                          "... (joints rot) -> ... joints rot",
-                          rot=self.nfeats)
+        poses = rearrange(
+            poses_features, "... (joints rot) -> ... joints rot", rot=self.nfeats
+        )
         return root_y, vel_trajectory, poses
 
     def inverse(self, features):
@@ -98,4 +104,5 @@ class SMPLVelP(Rots2Rfeats):
         matrix_poses = to_matrix(self.pose_rep, poses)
 
         from temos.transforms.smpl import RotTransDatastruct
+
         return RotTransDatastruct(rots=matrix_poses, trans=trans)

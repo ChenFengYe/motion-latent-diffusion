@@ -17,14 +17,15 @@ def get_forward_direction(poses, jointstype="mmm"):
     elif jointstype == "humanml3d":
         joints = humanml3d_joints
     else:
-        raise TypeError('Only supports mmm, mmmns and humanl3d jointstype')
+        raise TypeError("Only supports mmm, mmmns and humanl3d jointstype")
     # Shoulders
     LS, RS = joints.index("LS"), joints.index("RS")
     # Hips
     LH, RH = joints.index("LH"), joints.index("RH")
 
-    across = poses[..., RH, :] - poses[..., LH, :] + poses[..., RS, :] - poses[
-        ..., LS, :]
+    across = (
+        poses[..., RH, :] - poses[..., LH, :] + poses[..., RS, :] - poses[..., LS, :]
+    )
     forward = torch.stack((-across[..., 2], across[..., 0]), axis=-1)
     forward = torch.nn.functional.normalize(forward, dim=-1)
     return forward
@@ -36,7 +37,7 @@ def get_floor(poses, jointstype="mmm"):
     elif jointstype == "humanml3d":
         joints = humanml3d_joints
     else:
-        raise TypeError('Only supports mmm, mmmns and humanl3d jointstype')
+        raise TypeError("Only supports mmm, mmmns and humanl3d jointstype")
     ndim = len(poses.shape)
     # Feet
     LM, RM = joints.index("LMrot"), joints.index("RMrot")
@@ -70,10 +71,7 @@ def gaussian_filter1d(_inputs, sigma, truncate=4.0):
     sd = float(sigma)
     radius = int(truncate * sd + 0.5)
     sigma2 = sigma * sigma
-    x = torch.arange(-radius,
-                     radius + 1,
-                     device=inputs.device,
-                     dtype=inputs.dtype)
+    x = torch.arange(-radius, radius + 1, device=inputs.device, dtype=inputs.dtype)
     phi_x = torch.exp(-0.5 / sigma2 * x**2)
     phi_x = phi_x / phi_x.sum()
 
@@ -81,7 +79,6 @@ def gaussian_filter1d(_inputs, sigma, truncate=4.0):
     groups = inputs.shape[-1]
     weights = torch.tile(phi_x, (groups, 1, 1))
     inputs = inputs.transpose(-1, -2)
-    outputs = F.conv1d(inputs, weights, padding="same",
-                       groups=groups).transpose(-1, -2)
+    outputs = F.conv1d(inputs, weights, padding="same", groups=groups).transpose(-1, -2)
 
     return outputs.reshape(_inputs.shape)

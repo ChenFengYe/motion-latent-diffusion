@@ -17,7 +17,9 @@ class HumanAct12Poses(Dataset):
         super().__init__(**kargs)
 
         pkldatafilepath = os.path.join(datapath, "humanact12poses.pkl")
-        with rich.progress.open(pkldatafilepath, "rb", description="loading humanact12 pkl") as f:
+        with rich.progress.open(
+            pkldatafilepath, "rb", description="loading humanact12 pkl"
+        ) as f:
             data = pkl.load(f)
 
         self._pose = [x for x in data["poses"]]

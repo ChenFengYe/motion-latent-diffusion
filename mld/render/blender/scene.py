@@ -55,7 +55,7 @@ def setup_scene(
         scene.render.resolution_x = 1280 * 2
         scene.render.resolution_y = 1024 * 2
 
-    scene.render.film_transparent= True
+    scene.render.film_transparent = True
     world = bpy.data.worlds["World"]
     world.use_nodes = True
     bg = world.node_tree.nodes["Background"]

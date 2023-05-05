@@ -29,8 +29,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 # parsing argmument
 parser = argparse.ArgumentParser()
-parser.add_argument("--batchSize", type=int,
-                    default=1, help="input batch size")
+parser.add_argument("--batchSize", type=int, default=1, help="input batch size")
 parser.add_argument(
     "--num_smplify_iters", type=int, default=100, help="num of smplify iters"  # 100
 )
@@ -40,8 +39,7 @@ parser.add_argument("--num_joints", type=int, default=22, help="joint number")
 parser.add_argument(
     "--joint_category", type=str, default="AMASS", help="use correspondence"
 )
-parser.add_argument("--fix_foot", type=str,
-                    default="False", help="fix foot or not")
+parser.add_argument("--fix_foot", type=str, default="False", help="fix foot or not")
 parser.add_argument(
     "--data_folder",
     type=str,
@@ -56,8 +54,7 @@ parser.add_argument(
     help="results save folder",
 )
 parser.add_argument("--dir", type=str, default=None, help="folder use")
-parser.add_argument("--files", type=str,
-                    default="test_motion.npy", help="files use")
+parser.add_argument("--files", type=str, default="test_motion.npy", help="files use")
 opt = parser.parse_args()
 print(opt)
 
@@ -117,7 +114,7 @@ if opt.dir:
     # random begin for parallel
     file_list = natsort.natsorted(os.listdir(opt.dir))
     begin_id = random.randrange(0, len(file_list))
-    file_list = file_list[begin_id:]+file_list[:begin_id]
+    file_list = file_list[begin_id:] + file_list[:begin_id]
     for item in file_list:
         if item.endswith(".npy"):
             paths.append(os.path.join(opt.dir, item))
@@ -137,9 +134,10 @@ if not os.path.isdir(opt.save_folder):
 
 for path in paths:
     dir_save = os.path.join(
-        opt.save_folder, "results_smplfitting", "SMPLFit_" + os.path.basename(path)[:-4])
+        opt.save_folder, "results_smplfitting", "SMPLFit_" + os.path.basename(path)[:-4]
+    )
 
-    if os.path.exists(path[:-4]+"_mesh.npy"):
+    if os.path.exists(path[:-4] + "_mesh.npy"):
         print(f"npy is fitted {path[:-4]}_mesh.npy")
         # check_file = ""
         # try:
@@ -185,14 +183,13 @@ for path in paths:
     pred_pose_prev = torch.zeros(opt.batchSize, 72).to(device)
     pred_betas_prev = torch.zeros(opt.batchSize, 10).to(device)
     pred_cam_t_prev = torch.zeros(opt.batchSize, 3).to(device)
-    keypoints_3d_prev = torch.zeros(
-        opt.batchSize, opt.num_joints, 3).to(device)
+    keypoints_3d_prev = torch.zeros(opt.batchSize, opt.num_joints, 3).to(device)
 
     for idx in range(num_seqs):
         print(f"computing frame {idx}")
 
         ply_path = dir_save + "/" + "motion_%04d" % idx + ".ply"
-        if os.path.exists(ply_path[:-4]+".pkl"):
+        if os.path.exists(ply_path[:-4] + ".pkl"):
             print(f"this frame is fitted {ply_path}")
             continue
 
@@ -206,13 +203,11 @@ for path in paths:
         else:
             # ToDo-use previous results rather than loading
             data_param = joblib.load(
-                dir_save + "/" + "motion_%04d" % (idx - 1) + ".pkl")
-            pred_betas[0, :] = torch.from_numpy(
-                data_param["beta"]).unsqueeze(0).float()
-            pred_pose[0, :] = torch.from_numpy(
-                data_param["pose"]).unsqueeze(0).float()
-            pred_cam_t[0, :] = torch.from_numpy(
-                data_param["cam"]).unsqueeze(0).float()
+                dir_save + "/" + "motion_%04d" % (idx - 1) + ".pkl"
+            )
+            pred_betas[0, :] = torch.from_numpy(data_param["beta"]).unsqueeze(0).float()
+            pred_pose[0, :] = torch.from_numpy(data_param["pose"]).unsqueeze(0).float()
+            pred_cam_t[0, :] = torch.from_numpy(data_param["cam"]).unsqueeze(0).float()
 
         if opt.joint_category == "AMASS":
             confidence_input = torch.ones(opt.num_joints)
@@ -256,7 +251,8 @@ for path in paths:
         # gt debuggin
         if False:
             mesh_p = trimesh.Trimesh(
-                vertices=keypoints_3d.detach().cpu().numpy().squeeze(), process=False)
+                vertices=keypoints_3d.detach().cpu().numpy().squeeze(), process=False
+            )
             mesh_p.export(dir_save + "/" + "%04d" % idx + "_gt.ply")
 
         mesh_p = trimesh.Trimesh(
@@ -272,8 +268,7 @@ for path in paths:
         param["beta"] = new_opt_betas.detach().cpu().numpy()
         param["pose"] = new_opt_pose.detach().cpu().numpy()
         param["cam"] = new_opt_cam_t.detach().cpu().numpy()
-        joblib.dump(param, dir_save + "/" + "motion_%04d" %
-                    idx + ".pkl", compress=3)
+        joblib.dump(param, dir_save + "/" + "motion_%04d" % idx + ".pkl", compress=3)
         print("Output: " + dir_save + "/" + "motion_%04d" % idx + ".pkl")
 
     print("merge ply to npy for mesh rendering")

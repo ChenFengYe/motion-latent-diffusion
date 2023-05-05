@@ -11,7 +11,6 @@ from mld.utils.temos_utils import lengths_to_mask
 
 
 class MldTextEncoder(nn.Module):
-
     def __init__(
         self,
         modelpath: str,
@@ -19,7 +18,6 @@ class MldTextEncoder(nn.Module):
         last_hidden_state: bool = False,
         latent_dim: list = [1, 256],
     ) -> None:
-
         super().__init__()
 
         self.latent_dim = latent_dim
@@ -60,12 +58,9 @@ class MldTextEncoder(nn.Module):
             text_input_ids = text_inputs.input_ids
             # split into max length Clip can handle
             if text_input_ids.shape[-1] > self.tokenizer.model_max_length:
-                text_input_ids = text_input_ids[:, :self.tokenizer.
-                                                model_max_length]
+                text_input_ids = text_input_ids[:, : self.tokenizer.model_max_length]
         elif self.name == "bert":
-            text_inputs = self.tokenizer(texts,
-                                         return_tensors="pt",
-                                         padding=True)
+            text_inputs = self.tokenizer(texts, return_tensors="pt", padding=True)
 
         # use pooled ouuput if latent dim is two-dimensional
         # pooled = 0 if self.latent_dim[0] == 1 else 1 # (bs, seq_len, text_encoded_dim) -> (bs, text_encoded_dim)
@@ -73,17 +68,20 @@ class MldTextEncoder(nn.Module):
         if self.name == "clip":
             # (batch_Size, text_encoded_dim)
             text_embeddings = self.text_model.get_text_features(
-                text_input_ids.to(self.text_model.device))
+                text_input_ids.to(self.text_model.device)
+            )
             # (batch_Size, 1, text_encoded_dim)
             text_embeddings = text_embeddings.unsqueeze(1)
         elif self.name == "clip_hidden":
             # (batch_Size, seq_length , text_encoded_dim)
             text_embeddings = self.text_model.text_model(
-                text_input_ids.to(self.text_model.device)).last_hidden_state
+                text_input_ids.to(self.text_model.device)
+            ).last_hidden_state
         elif self.name == "bert":
             # (batch_Size, seq_length , text_encoded_dim)
             text_embeddings = self.text_model(
-                **text_inputs.to(self.text_model.device)).last_hidden_state
+                **text_inputs.to(self.text_model.device)
+            ).last_hidden_state
         else:
             raise NotImplementedError(f"Model {self.name} not implemented")
 

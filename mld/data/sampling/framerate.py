@@ -15,8 +15,8 @@ def upsample(motion, last_framerate, new_framerate):
     assert step >= 1
 
     # Alpha blending => interpolation
-    alpha = np.linspace(0, 1, step+1)
-    last = np.einsum("l,...->l...", 1-alpha, motion[:-1])
+    alpha = np.linspace(0, 1, step + 1)
+    last = np.einsum("l,...->l...", 1 - alpha, motion[:-1])
     new = np.einsum("l,...->l...", alpha, motion[1:])
 
     chuncks = (last + new)[:-1]

@@ -3,9 +3,11 @@ import torch
 
 def lengths_to_mask(lengths):
     max_len = max(lengths)
-    mask = torch.arange(max_len, device=lengths.device).expand(len(lengths), max_len) < lengths.unsqueeze(1)
+    mask = torch.arange(max_len, device=lengths.device).expand(
+        len(lengths), max_len
+    ) < lengths.unsqueeze(1)
     return mask
-    
+
 
 def collate_tensors(batch):
     dims = batch[0].dim()
@@ -30,6 +32,10 @@ def collate(batch):
     lenbatchTensor = torch.as_tensor(lenbatch)
 
     maskbatchTensor = lengths_to_mask(lenbatchTensor)
-    batch = {"x": databatchTensor, "y": labelbatchTensor,
-             "mask": maskbatchTensor, "lengths": lenbatchTensor}
+    batch = {
+        "x": databatchTensor,
+        "y": labelbatchTensor,
+        "mask": maskbatchTensor,
+        "lengths": lenbatchTensor,
+    }
     return batch

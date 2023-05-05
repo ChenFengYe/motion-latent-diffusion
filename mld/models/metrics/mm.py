@@ -19,14 +19,10 @@ class MMMetrics(Metric):
         self.mm_num_times = mm_num_times
 
         self.add_state("count", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("count_seq",
-                       default=torch.tensor(0),
-                       dist_reduce_fx="sum")
+        self.add_state("count_seq", default=torch.tensor(0), dist_reduce_fx="sum")
 
         self.metrics = ["MultiModality"]
-        self.add_state("MultiModality",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
+        self.add_state("MultiModality", default=torch.tensor(0.0), dist_reduce_fx="sum")
 
         # chached batches
         self.add_state("mm_motion_embeddings", default=[], dist_reduce_fx=None)
@@ -43,10 +39,10 @@ class MMMetrics(Metric):
             return metrics
 
         # cat all embeddings
-        all_mm_motions = torch.cat(self.mm_motion_embeddings,
-                                   axis=0).cpu().numpy()
-        metrics['MultiModality'] = calculate_multimodality_np(
-            all_mm_motions, self.mm_num_times)
+        all_mm_motions = torch.cat(self.mm_motion_embeddings, axis=0).cpu().numpy()
+        metrics["MultiModality"] = calculate_multimodality_np(
+            all_mm_motions, self.mm_num_times
+        )
 
         return {**metrics}
 

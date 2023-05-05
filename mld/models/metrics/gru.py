@@ -13,13 +13,15 @@ from mld.models.architectures import humanact12_gru
 class HUMANACTMetrics(Metric):
     full_state_update = True
 
-    def __init__(self,
-                 datapath,
-                 num_labels=12,
-                 diversity_times=200,
-                 multimodality_times=20,
-                 dist_sync_on_step=True,
-                 **kwargs):
+    def __init__(
+        self,
+        datapath,
+        num_labels=12,
+        diversity_times=200,
+        multimodality_times=20,
+        dist_sync_on_step=True,
+        **kwargs
+    ):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
         self.name = "matching, fid, and diversity scores"
@@ -30,10 +32,12 @@ class HUMANACTMetrics(Metric):
 
         # init classifier module
         self.gru_classifier = humanact12_gru.MotionDiscriminator(
-            input_size=72, hidden_size=128, hidden_layer=2, output_size=12)
+            input_size=72, hidden_size=128, hidden_layer=2, output_size=12
+        )
 
         self.gru_classifier_for_fid = humanact12_gru.MotionDiscriminatorForFID(
-            input_size=72, hidden_size=128, hidden_layer=2, output_size=12)
+            input_size=72, hidden_size=128, hidden_layer=2, output_size=12
+        )
         # load pretrianed
         a2m_checkpoint = torch.load(datapath)
         self.gru_classifier.load_state_dict(a2m_checkpoint["model"])
@@ -48,48 +52,38 @@ class HUMANACTMetrics(Metric):
 
         # add metrics
         self.add_state("count", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("count_seq",
-                       default=torch.tensor(0),
-                       dist_reduce_fx="sum")
+        self.add_state("count_seq", default=torch.tensor(0), dist_reduce_fx="sum")
         self.metrics = []
         # Accuracy
-        self.add_state("accuracy",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
-        self.add_state("gt_accuracy",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
+        self.add_state("accuracy", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("gt_accuracy", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.metrics.extend(["accuracy", "gt_accuracy"])
         # Fid
-        self.add_state("FID", default=torch.tensor(0.), dist_reduce_fx="sum")
-        self.add_state("gt_FID",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
+        self.add_state("FID", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("gt_FID", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.metrics.extend(["FID", "gt_FID"])
         # Diversity
-        self.add_state("Diversity",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
-        self.add_state("gt_Diversity",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
+        self.add_state("Diversity", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("gt_Diversity", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.metrics.extend(["Diversity", "gt_Diversity"])
         # Multimodality
-        self.add_state("Multimodality",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
-        self.add_state("gt_Multimodality",
-                       default=torch.tensor(0.),
-                       dist_reduce_fx="sum")
+        self.add_state("Multimodality", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state(
+            "gt_Multimodality", default=torch.tensor(0.0), dist_reduce_fx="sum"
+        )
         self.metrics.extend(["Multimodality", "gt_Multimodality"])
 
         # chached batches
-        self.add_state("confusion",
-                       torch.zeros(num_labels, num_labels, dtype=torch.long),
-                       dist_reduce_fx="sum")
-        self.add_state("gt_confusion",
-                       torch.zeros(num_labels, num_labels, dtype=torch.long),
-                       dist_reduce_fx="sum")
+        self.add_state(
+            "confusion",
+            torch.zeros(num_labels, num_labels, dtype=torch.long),
+            dist_reduce_fx="sum",
+        )
+        self.add_state(
+            "gt_confusion",
+            torch.zeros(num_labels, num_labels, dtype=torch.long),
+            dist_reduce_fx="sum",
+        )
         self.add_state("label_embeddings", default=[], dist_reduce_fx=None)
         self.add_state("recmotion_embeddings", default=[], dist_reduce_fx=None)
         self.add_state("gtmotion_embeddings", default=[], dist_reduce_fx=None)
@@ -107,15 +101,15 @@ class HUMANACTMetrics(Metric):
 
         # Accuracy
         self.accuracy = torch.trace(self.confusion) / torch.sum(self.confusion)
-        self.gt_accuracy = torch.trace(self.gt_confusion) / torch.sum(
-            self.gt_confusion)
+        self.gt_accuracy = torch.trace(self.gt_confusion) / torch.sum(self.gt_confusion)
 
         # cat all embeddings
         all_labels = torch.cat(self.label_embeddings, axis=0)
         all_genmotions = torch.cat(self.recmotion_embeddings, axis=0)
         all_gtmotions = torch.cat(self.gtmotion_embeddings, axis=0)
         all_gtmotions2 = all_gtmotions.clone()[
-            torch.randperm(all_gtmotions.shape[0]), :]
+            torch.randperm(all_gtmotions.shape[0]), :
+        ]
         genstats = calculate_activation_statistics(all_genmotions)
         gtstats = calculate_activation_statistics(all_gtmotions)
         gtstats2 = calculate_activation_statistics(all_gtmotions2)
@@ -128,14 +122,14 @@ class HUMANACTMetrics(Metric):
             all_labels,
             self.num_labels,
             diversity_times=self.diversity_times,
-            multimodality_times=self.multimodality_times)
+            multimodality_times=self.multimodality_times,
+        )
 
         self.gt_Diversity, self.gt_Multimodality = calculate_diversity_multimodality(
-            all_gtmotions, all_labels, self.num_labels)
+            all_gtmotions, all_labels, self.num_labels
+        )
 
-        metrics.update(
-            {metric: getattr(self, metric)
-             for metric in self.metrics})
+        metrics.update({metric: getattr(self, metric) for metric in self.metrics})
 
         # Compute Fid
         metrics["FID"] = calculate_fid(gtstats, genstats)
@@ -166,10 +160,8 @@ class HUMANACTMetrics(Metric):
             self.gt_confusion[label][pred] += 1
 
         # Compute embeddings
-        recmotion_embeddings = self.gru_classifier_for_fid(recmotion,
-                                                           lengths=lengths)
-        gtmotion_embeddings = self.gru_classifier_for_fid(gtmotion,
-                                                          lengths=lengths)
+        recmotion_embeddings = self.gru_classifier_for_fid(recmotion, lengths=lengths)
+        gtmotion_embeddings = self.gru_classifier_for_fid(gtmotion, lengths=lengths)
 
         # store all texts and motions
         self.label_embeddings.append(labels)

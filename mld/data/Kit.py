@@ -9,31 +9,28 @@ from .utils import all_collate
 
 
 class KitDataModule(BASEDataModule):
-
-    def __init__(self,
-                 cfg,
-                 phase='train',
-                 collate_fn=all_collate,
-                 batch_size: int = 32,
-                 num_workers: int = 16,
-                 **kwargs):
-        super().__init__(batch_size=batch_size,
-                         num_workers=num_workers,
-                         collate_fn=collate_fn)
+    def __init__(
+        self,
+        cfg,
+        phase="train",
+        collate_fn=all_collate,
+        batch_size: int = 32,
+        num_workers: int = 16,
+        **kwargs
+    ):
+        super().__init__(
+            batch_size=batch_size, num_workers=num_workers, collate_fn=collate_fn
+        )
         self.save_hyperparameters(logger=False)
-        self.name = 'kit'
+        self.name = "kit"
         self.njoints = 21
-        if phase == 'text_only':
+        if phase == "text_only":
             self.Dataset = TextOnlyDataset
         else:
             self.Dataset = Text2MotionDatasetV2
         self.cfg = cfg
 
-        sample_overrides = {
-            "split": "val",
-            "tiny": True,
-            "progress_bar": False
-        }
+        sample_overrides = {"split": "val", "tiny": True, "progress_bar": False}
         self._sample_set = self.get_sample_set(overrides=sample_overrides)
 
         # Get additional info of the dataset
@@ -61,9 +58,9 @@ class KitDataModule(BASEDataModule):
         if mm_on:
             self.is_mm = True
             self.name_list = self.test_dataset.name_list
-            self.mm_list = np.random.choice(self.name_list,
-                                            self.cfg.TEST.MM_NUM_SAMPLES,
-                                            replace=False)
+            self.mm_list = np.random.choice(
+                self.name_list, self.cfg.TEST.MM_NUM_SAMPLES, replace=False
+            )
             self.test_dataset.name_list = self.mm_list
         else:
             self.is_mm = False

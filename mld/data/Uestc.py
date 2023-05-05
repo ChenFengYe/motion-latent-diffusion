@@ -6,18 +6,19 @@ import pickle as pkl
 
 
 class UestcDataModule(BASEDataModule):
-
-    def __init__(self,
-                 cfg,
-                 batch_size,
-                 num_workers,
-                 collate_fn=None,
-                 method_name="vibe",
-                 phase="train",
-                 **kwargs):
-        super().__init__(batch_size=batch_size,
-                         num_workers=num_workers,
-                         collate_fn=collate_fn)
+    def __init__(
+        self,
+        cfg,
+        batch_size,
+        num_workers,
+        collate_fn=None,
+        method_name="vibe",
+        phase="train",
+        **kwargs
+    ):
+        super().__init__(
+            batch_size=batch_size, num_workers=num_workers, collate_fn=collate_fn
+        )
         self.save_hyperparameters(logger=False)
         self.name = "Uestc"
 

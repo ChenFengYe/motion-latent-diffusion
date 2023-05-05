@@ -6,19 +6,19 @@ from typing import List, Tuple
 import numpy as np
 from temos.data.pose2joints import mmm_kinematic_tree, mmm_to_smplh_scaling_factor
 
-mmm_colors = ['black', 'magenta', 'red', 'green', 'blue']
+mmm_colors = ["black", "magenta", "red", "green", "blue"]
 
 
 def init_axis(fig, title, radius=1.5, dist=10):
-    ax = fig.add_subplot(1, 1, 1, projection='3d')
-    ax.view_init(elev=20., azim=-60)
+    ax = fig.add_subplot(1, 1, 1, projection="3d")
+    ax.view_init(elev=20.0, azim=-60)
 
     fact = 2
     ax.set_xlim3d([-radius / fact, radius / fact])
     ax.set_ylim3d([-radius / fact, radius / fact])
     ax.set_zlim3d([0, radius])
 
-    ax.set_aspect('auto')
+    ax.set_aspect("auto")
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.set_zticklabels([])
@@ -28,18 +28,19 @@ def init_axis(fig, title, radius=1.5, dist=10):
     ax.dist = dist
     ax.grid(b=False)
 
-    ax.set_title(title, loc='center', wrap=True)
+    ax.set_title(title, loc="center", wrap=True)
     return ax
 
 
 def plot_floor(ax, minx, maxx, miny, maxy, minz):
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
     # Plot a plane XZ
     verts = [
         [minx, miny, minz],
         [minx, maxy, minz],
         [maxx, maxy, minz],
-        [maxx, miny, minz]
+        [maxx, miny, minz],
     ]
     xz_plane = Poly3DCollection([verts], zorder=1)
     xz_plane.set_facecolor((0.5, 0.5, 0.5, 1))
@@ -59,7 +60,7 @@ def plot_floor(ax, minx, maxx, miny, maxy, minz):
         [minx_all, miny_all, minz],
         [minx_all, maxy_all, minz],
         [maxx_all, maxy_all, minz],
-        [maxx_all, miny_all, minz]
+        [maxx_all, miny_all, minz],
     ]
     xz_plane = Poly3DCollection([verts], zorder=1)
     xz_plane.set_facecolor((0.5, 0.5, 0.5, 0.5))
@@ -73,16 +74,21 @@ def update_camera(ax, root, radius=1.5):
     ax.set_ylim3d([-radius / fact + root[1], radius / fact + root[1]])
 
 
-def render_animation(joints: np.ndarray, output: str = "notebook", title: str = "",
-                     fps: float = 12.5,
-                     kinematic_tree: List[List[int]] = mmm_kinematic_tree,
-                     colors: List[str] = mmm_colors,
-                     figsize: Tuple[int] = (4, 4),
-                     fontsize: int = 15):
+def render_animation(
+    joints: np.ndarray,
+    output: str = "notebook",
+    title: str = "",
+    fps: float = 12.5,
+    kinematic_tree: List[List[int]] = mmm_kinematic_tree,
+    colors: List[str] = mmm_colors,
+    figsize: Tuple[int] = (4, 4),
+    fontsize: int = 15,
+):
     import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation
     import matplotlib.patheffects as pe
-    plt.rcParams.update({'font.size': fontsize})
+
+    plt.rcParams.update({"font.size": fontsize})
 
     # Z is gravity here
     x, y, z = 0, 1, 2
@@ -97,9 +103,11 @@ def render_animation(joints: np.ndarray, output: str = "notebook", title: str = 
 
     # Create spline line
     trajectory = joints[:, 0, [x, y]]
-    avg_segment_length = np.mean(np.linalg.norm(np.diff(trajectory, axis=0), axis=1)) + 1e-3
+    avg_segment_length = (
+        np.mean(np.linalg.norm(np.diff(trajectory, axis=0), axis=1)) + 1e-3
+    )
     draw_offset = int(25 / avg_segment_length)
-    spline_line, = ax.plot(*trajectory.T, zorder=10, color="white")
+    (spline_line,) = ax.plot(*trajectory.T, zorder=10, color="white")
 
     # Create a floor
     minx, miny, _ = joints.min(axis=(0, 1))
@@ -122,12 +130,21 @@ def render_animation(joints: np.ndarray, output: str = "notebook", title: str = 
         root = skeleton[0]
         update_camera(ax, root)
 
-        for index, (chain, color) in enumerate(zip(reversed(kinematic_tree), reversed(colors))):
+        for index, (chain, color) in enumerate(
+            zip(reversed(kinematic_tree), reversed(colors))
+        ):
             if not initialized:
-                lines.append(ax.plot(skeleton[chain, x],
-                                     skeleton[chain, y],
-                                     skeleton[chain, z], linewidth=8.0, color=color, zorder=20,
-                                     path_effects=[pe.SimpleLineShadow(), pe.Normal()]))
+                lines.append(
+                    ax.plot(
+                        skeleton[chain, x],
+                        skeleton[chain, y],
+                        skeleton[chain, z],
+                        linewidth=8.0,
+                        color=color,
+                        zorder=20,
+                        path_effects=[pe.SimpleLineShadow(), pe.Normal()],
+                    )
+                )
 
             else:
                 lines[index][0].set_xdata(skeleton[chain, x])
@@ -148,8 +165,9 @@ def render_animation(joints: np.ndarray, output: str = "notebook", title: str = 
 
     if output == "notebook":
         from IPython.display import HTML
+
         HTML(anim.to_jshtml())
     else:
-        anim.save(output, writer='ffmpeg', fps=fps)
+        anim.save(output, writer="ffmpeg", fps=fps)
 
     plt.close()

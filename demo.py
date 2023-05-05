@@ -9,10 +9,12 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 from torch.utils.data import ConcatDataset, DataLoader
+
 # from torchsummary import summary
 from tqdm import tqdm
 
 from mld.config import parse_args
+
 # from mld.datasets.get_dataset import get_datasets
 from mld.data.get_data import get_datasets
 from mld.data.sampling import subsample, upsample
@@ -30,10 +32,10 @@ def main():
          3 random sampling
          4 reconstruction
 
-    ToDo 
+    ToDo
     1 use one funtion for all expoert
     2 fitting smpl and export fbx in this file
-    3 
+    3
 
     """
     # parse options
@@ -61,7 +63,8 @@ def main():
         )
         if text:
             motion_path = input(
-                "Please enter npy_path for motion transfer, none for skip:")
+                "Please enter npy_path for motion transfer, none for skip:"
+            )
         # text 2 motion
         if text and not motion_path:
             cfg.DEMO.MOTION_TRANSFER = False
@@ -87,14 +90,15 @@ def main():
         text = [text]
 
     output_dir = Path(
-        os.path.join(cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME),
-                     "samples_" + cfg.TIME))
+        os.path.join(
+            cfg.FOLDER, str(cfg.model.model_type), str(cfg.NAME), "samples_" + cfg.TIME
+        )
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # cuda options
     if cfg.ACCELERATOR == "gpu":
-        os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(
-            str(x) for x in cfg.DEVICE)
+        os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(str(x) for x in cfg.DEVICE)
         device = torch.device("cuda")
 
     # load dataset to extract nfeats dim of model
@@ -126,8 +130,7 @@ def main():
 
     # loading checkpoints
     logger.info("Loading checkpoints from {}".format(cfg.TEST.CHECKPOINTS))
-    state_dict = torch.load(cfg.TEST.CHECKPOINTS,
-                            map_location="cpu")["state_dict"]
+    state_dict = torch.load(cfg.TEST.CHECKPOINTS, map_location="cpu")["state_dict"]
     # # remove mismatched and unused params
     # from collections import OrderedDict
     # new_state_dict = OrderedDict()
@@ -159,14 +162,14 @@ def main():
 
     # sample
     with torch.no_grad():
-        rep_lst = []    
+        rep_lst = []
         rep_ref_lst = []
         texts_lst = []
         # task: input or Example
         if text:
             # prepare batch data
             batch = {"length": length, "text": text}
-            
+
             for rep in range(cfg.DEMO.REPLICATION):
                 # text motion transfer
                 if cfg.DEMO.MOTION_TRANSFER:
@@ -186,37 +189,40 @@ def main():
                 nsample = len(joints)
                 id = 0
                 for i in range(nsample):
-                    npypath = str(output_dir /
-                                f"{task}_{length[i]}_batch{id}_{i}.npy")
+                    npypath = str(output_dir / f"{task}_{length[i]}_batch{id}_{i}.npy")
                     with open(npypath.replace(".npy", ".txt"), "w") as text_file:
                         text_file.write(batch["text"][i])
                     np.save(npypath, joints[i].detach().cpu().numpy())
                     logger.info(f"Motions are generated here:\n{npypath}")
-                
+
                 if cfg.DEMO.OUTALL:
                     rep_lst.append(joints)
                     texts_lst.append(batch["text"])
-                    
-                    
+
             if cfg.DEMO.OUTALL:
                 grouped_lst = []
                 for n in range(nsample):
-                    grouped_lst.append(torch.cat([r[n][None] for r in rep_lst], dim=0)[None]) 
+                    grouped_lst.append(
+                        torch.cat([r[n][None] for r in rep_lst], dim=0)[None]
+                    )
                 combinedOut = torch.cat(grouped_lst, dim=0)
                 try:
                     # save all motions
                     npypath = str(output_dir / f"{task}_{length[i]}_all.npy")
-                    
-                    np.save(npypath,combinedOut.detach().cpu().numpy())
-                    with open(npypath.replace('npy','txt'),"w") as text_file: 
+
+                    np.save(npypath, combinedOut.detach().cpu().numpy())
+                    with open(npypath.replace("npy", "txt"), "w") as text_file:
                         for texts in texts_lst:
                             for text in texts:
                                 text_file.write(text)
-                                text_file.write('\n')
-                    logger.info(f"All reconstructed motions are generated here:\n{npypath}")
+                                text_file.write("\n")
+                    logger.info(
+                        f"All reconstructed motions are generated here:\n{npypath}"
+                    )
                 except:
-                    raise ValueError("Lengths of motions are different, so we cannot save all motions in one file.")
-                    
+                    raise ValueError(
+                        "Lengths of motions are different, so we cannot save all motions in one file."
+                    )
 
         # random samlping
         if not text:
@@ -226,8 +232,7 @@ def main():
                 length = 196
                 nsample, latent_dim = 500, 256
                 batch = {
-                    "latent":
-                    torch.randn(1, nsample, latent_dim, device=model.device),
+                    "latent": torch.randn(1, nsample, latent_dim, device=model.device),
                     "length": [int(length)] * nsample,
                 }
                 # vae random sampling
@@ -246,8 +251,7 @@ def main():
                 # upscaling to compare with other methods
                 # joints = upsample(joints, cfg.DATASET.KIT.FRAME_RATE, cfg.DEMO.FRAME_RATE)
                 for i in range(nsample):
-                    npypath = output_dir / \
-                        f"{text.split(' ')[0]}_{length}_{i}.npy"
+                    npypath = output_dir / f"{text.split(' ')[0]}_{length}_{i}.npy"
                     np.save(npypath, joints[i].detach().cpu().numpy())
                     logger.info(f"Motions are generated here:\n{npypath}")
 
@@ -270,16 +274,19 @@ def main():
                         nsample = len(joints)
                         length = batch["length"]
                         for i in range(nsample):
-                            npypath = str(output_dir /
-                                        f"{task}_{length[i]}_batch{id}_{i}_{rep}.npy")
+                            npypath = str(
+                                output_dir
+                                / f"{task}_{length[i]}_batch{id}_{i}_{rep}.npy"
+                            )
                             np.save(npypath, joints[i].detach().cpu().numpy())
                             # if exps == "text-motion":
                             np.save(
                                 npypath.replace(".npy", "_ref.npy"),
                                 joints_ref[i].detach().cpu().numpy(),
                             )
-                            with open(npypath.replace(".npy", ".txt"),
-                                    "w") as text_file:
+                            with open(
+                                npypath.replace(".npy", ".txt"), "w"
+                            ) as text_file:
                                 text_file.write(batch["text"][i])
                             logger.info(
                                 f"Reconstructed motions are generated here:\n{npypath}"
@@ -292,24 +299,25 @@ def main():
 
         # ToDo fix time counting
         total_time = time.time() - total_time
-        print(f'MLD Infer time - This/Ave batch: {infer_time/num_batch:.2f}')
-        print(f'MLD Infer FPS - Total batch: {num_all_frame/infer_time:.2f}')
-        print(f'MLD Infer time - This/Ave batch: {infer_time/num_batch:.2f}')
-        print(f'MLD Infer FPS - Total batch: {num_all_frame/infer_time:.2f}')
+        print(f"MLD Infer time - This/Ave batch: {infer_time/num_batch:.2f}")
+        print(f"MLD Infer FPS - Total batch: {num_all_frame/infer_time:.2f}")
+        print(f"MLD Infer time - This/Ave batch: {infer_time/num_batch:.2f}")
+        print(f"MLD Infer FPS - Total batch: {num_all_frame/infer_time:.2f}")
         print(
-            f'MLD Infer FPS - Running Poses Per Second: {num_ave_frame*infer_time/num_batch:.2f}')
+            f"MLD Infer FPS - Running Poses Per Second: {num_ave_frame*infer_time/num_batch:.2f}"
+        )
+        print(f"MLD Infer FPS - {num_all_frame/infer_time:.2f}s")
         print(
-            f'MLD Infer FPS - {num_all_frame/infer_time:.2f}s')
-        print(
-            f'MLD Infer FPS - Running Poses Per Second: {num_ave_frame*infer_time/num_batch:.2f}')
+            f"MLD Infer FPS - Running Poses Per Second: {num_ave_frame*infer_time/num_batch:.2f}"
+        )
 
         # todo no num_batch!!!
         # num_batch=> num_forward
         print(
-            f'MLD Infer FPS - time for 100 Poses: {infer_time/(num_batch*num_ave_frame)*100:.2f}'
+            f"MLD Infer FPS - time for 100 Poses: {infer_time/(num_batch*num_ave_frame)*100:.2f}"
         )
         print(
-            f'Total time spent: {total_time:.2f} seconds (including model loading time and exporting time).'
+            f"Total time spent: {total_time:.2f} seconds (including model loading time and exporting time)."
         )
 
     if cfg.DEMO.RENDER:
@@ -327,9 +335,9 @@ def main():
         from mld.utils.demo_utils import render_batch
 
         blenderpath = cfg.RENDER.BLENDER_PATH
-        render_batch(os.path.dirname(npypath),
-                     execute_python=blenderpath,
-                     mode="sequence")  # sequence
+        render_batch(
+            os.path.dirname(npypath), execute_python=blenderpath, mode="sequence"
+        )  # sequence
         logger.info(f"Motions are rendered here:\n{os.path.dirname(npypath)}")
 
 

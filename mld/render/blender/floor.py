@@ -18,16 +18,28 @@ def plot_floor(data, big_plane=True):
     maxx, maxy, _ = data.max(axis=(0, 1))
     minz = 0
 
-    location = ((maxx + minx)/2, (maxy + miny)/2, 0)
+    location = ((maxx + minx) / 2, (maxy + miny) / 2, 0)
     # a little bit bigger
-    scale = (1.08*(maxx - minx)/2, 1.08*(maxy - miny)/2, 1)
+    scale = (1.08 * (maxx - minx) / 2, 1.08 * (maxy - miny) / 2, 1)
 
-    bpy.ops.mesh.primitive_plane_add(size=2, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1))
+    bpy.ops.mesh.primitive_plane_add(
+        size=2, enter_editmode=False, align="WORLD", location=location, scale=(1, 1, 1)
+    )
 
-    bpy.ops.transform.resize(value=scale, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
-                             constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False,
-                             proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False,
-                             use_proportional_projected=False, release_confirm=True)
+    bpy.ops.transform.resize(
+        value=scale,
+        orient_type="GLOBAL",
+        orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+        orient_matrix_type="GLOBAL",
+        constraint_axis=(False, True, False),
+        mirror=True,
+        use_proportional_edit=False,
+        proportional_edit_falloff="SMOOTH",
+        proportional_size=1,
+        use_proportional_connected=False,
+        use_proportional_projected=False,
+        release_confirm=True,
+    )
     obj = bpy.data.objects["Plane"]
     obj.name = "SmallPlane"
     obj.data.name = "SmallPlane"
@@ -38,13 +50,29 @@ def plot_floor(data, big_plane=True):
         obj.active_material = floor_mat(color=(0.1, 0.1, 0.1, 1))
 
     if big_plane:
-        location = ((maxx + minx)/2, (maxy + miny)/2, -0.01)
-        bpy.ops.mesh.primitive_plane_add(size=2, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1))
+        location = ((maxx + minx) / 2, (maxy + miny) / 2, -0.01)
+        bpy.ops.mesh.primitive_plane_add(
+            size=2,
+            enter_editmode=False,
+            align="WORLD",
+            location=location,
+            scale=(1, 1, 1),
+        )
 
-        bpy.ops.transform.resize(value=[2*x for x in scale], orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
-                                 constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False,
-                                 proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False,
-                                 use_proportional_projected=False, release_confirm=True)
+        bpy.ops.transform.resize(
+            value=[2 * x for x in scale],
+            orient_type="GLOBAL",
+            orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+            orient_matrix_type="GLOBAL",
+            constraint_axis=(False, True, False),
+            mirror=True,
+            use_proportional_edit=False,
+            proportional_edit_falloff="SMOOTH",
+            proportional_size=1,
+            use_proportional_connected=False,
+            use_proportional_projected=False,
+            release_confirm=True,
+        )
 
         obj = bpy.data.objects["Plane"]
         obj.name = "BigPlane"

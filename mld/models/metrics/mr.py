@@ -9,38 +9,31 @@ from .utils import *
 
 # motion reconstruction metric
 class MRMetrics(Metric):
-
-    def __init__(self,
-                 njoints,
-                 jointstype: str = "mmm",
-                 force_in_meter: bool = True,
-                 align_root: bool = True,
-                 dist_sync_on_step=True,
-                 **kwargs):
+    def __init__(
+        self,
+        njoints,
+        jointstype: str = "mmm",
+        force_in_meter: bool = True,
+        align_root: bool = True,
+        dist_sync_on_step=True,
+        **kwargs
+    ):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
         if jointstype not in ["mmm", "humanml3d"]:
             raise NotImplementedError("This jointstype is not implemented.")
 
-        self.name = 'Motion Reconstructions'
+        self.name = "Motion Reconstructions"
         self.jointstype = jointstype
         self.align_root = align_root
         self.force_in_meter = force_in_meter
 
         self.add_state("count", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("count_seq",
-                       default=torch.tensor(0),
-                       dist_reduce_fx="sum")
+        self.add_state("count_seq", default=torch.tensor(0), dist_reduce_fx="sum")
 
-        self.add_state("MPJPE",
-                       default=torch.tensor([0.0]),
-                       dist_reduce_fx="sum")
-        self.add_state("PAMPJPE",
-                       default=torch.tensor([0.0]),
-                       dist_reduce_fx="sum")
-        self.add_state("ACCEL",
-                       default=torch.tensor([0.0]),
-                       dist_reduce_fx="sum")
+        self.add_state("MPJPE", default=torch.tensor([0.0]), dist_reduce_fx="sum")
+        self.add_state("PAMPJPE", default=torch.tensor([0.0]), dist_reduce_fx="sum")
+        self.add_state("ACCEL", default=torch.tensor([0.0]), dist_reduce_fx="sum")
         # todo
         # self.add_state("ROOT", default=torch.tensor([0.0]), dist_reduce_fx="sum")
 
@@ -70,8 +63,7 @@ class MRMetrics(Metric):
         mr_metrics["ACCEL"] = self.ACCEL / (count - 2 * count_seq) * factor
         return mr_metrics
 
-    def update(self, joints_rst: Tensor, joints_ref: Tensor,
-               lengths: List[int]):
+    def update(self, joints_rst: Tensor, joints_ref: Tensor, lengths: List[int]):
         assert joints_rst.shape == joints_ref.shape
         assert joints_rst.dim() == 4
         # (bs, seq, njoint=22, 3)
@@ -84,13 +76,12 @@ class MRMetrics(Metric):
         ref = joints_ref.detach().cpu()
 
         # align root joints index
-        if self.align_root and self.jointstype in ['mmm', 'humanml3d']:
+        if self.align_root and self.jointstype in ["mmm", "humanml3d"]:
             align_inds = [0]
         else:
             align_inds = None
 
         for i in range(len(lengths)):
-            self.MPJPE += torch.sum(
-                calc_mpjpe(rst[i], ref[i], align_inds=align_inds))
+            self.MPJPE += torch.sum(calc_mpjpe(rst[i], ref[i], align_inds=align_inds))
             self.PAMPJPE += torch.sum(calc_pampjpe(rst[i], ref[i]))
             self.ACCEL += torch.sum(calc_accel(rst[i], ref[i]))

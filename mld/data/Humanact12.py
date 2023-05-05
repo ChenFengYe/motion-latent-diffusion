@@ -4,17 +4,12 @@ import numpy as np
 
 
 class Humanact12DataModule(BASEDataModule):
-
-    def __init__(self,
-                 cfg,
-                 batch_size,
-                 num_workers,
-                 collate_fn=None,
-                 phase="train",
-                 **kwargs):
-        super().__init__(batch_size=batch_size,
-                         num_workers=num_workers,
-                         collate_fn=collate_fn)
+    def __init__(
+        self, cfg, batch_size, num_workers, collate_fn=None, phase="train", **kwargs
+    ):
+        super().__init__(
+            batch_size=batch_size, num_workers=num_workers, collate_fn=collate_fn
+        )
         self.save_hyperparameters(logger=False)
         self.name = "HumanAct12"
         self.Dataset = HumanAct12Poses
@@ -23,7 +18,7 @@ class Humanact12DataModule(BASEDataModule):
             "num_seq_max": 2,
             "split": "test",
             "tiny": True,
-            "progress_bar": False
+            "progress_bar": False,
         }
         # self._sample_set = self.get_sample_set(overrides=sample_overrides)
         # Get additional info of the dataset

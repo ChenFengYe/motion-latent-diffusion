@@ -20,6 +20,7 @@ from mld.models.operator.cross_attention import (
 )
 from mld.models.operator.position_encoding import build_position_encoding
 from mld.utils.temos_utils import lengths_to_mask
+
 """
 vae
 
@@ -31,21 +32,21 @@ mem for each decoder layer
 
 
 class MldVae(nn.Module):
-
-    def __init__(self,
-                 ablation,
-                 nfeats: int,
-                 latent_dim: list = [1, 256],
-                 ff_size: int = 1024,
-                 num_layers: int = 9,
-                 num_heads: int = 4,
-                 dropout: float = 0.1,
-                 arch: str = "all_encoder",
-                 normalize_before: bool = False,
-                 activation: str = "gelu",
-                 position_embedding: str = "learned",
-                 **kwargs) -> None:
-
+    def __init__(
+        self,
+        ablation,
+        nfeats: int,
+        latent_dim: list = [1, 256],
+        ff_size: int = 1024,
+        num_layers: int = 9,
+        num_heads: int = 4,
+        dropout: float = 0.1,
+        arch: str = "all_encoder",
+        normalize_before: bool = False,
+        activation: str = "gelu",
+        position_embedding: str = "learned",
+        **kwargs
+    ) -> None:
         super().__init__()
 
         self.latent_size = latent_dim[0]
@@ -57,15 +58,15 @@ class MldVae(nn.Module):
         self.pe_type = ablation.PE_TYPE
 
         if self.pe_type == "actor":
-            self.query_pos_encoder = PositionalEncoding(
-                self.latent_dim, dropout)
-            self.query_pos_decoder = PositionalEncoding(
-                self.latent_dim, dropout)
+            self.query_pos_encoder = PositionalEncoding(self.latent_dim, dropout)
+            self.query_pos_decoder = PositionalEncoding(self.latent_dim, dropout)
         elif self.pe_type == "mld":
             self.query_pos_encoder = build_position_encoding(
-                self.latent_dim, position_embedding=position_embedding)
+                self.latent_dim, position_embedding=position_embedding
+            )
             self.query_pos_decoder = build_position_encoding(
-                self.latent_dim, position_embedding=position_embedding)
+                self.latent_dim, position_embedding=position_embedding
+            )
         else:
             raise ValueError("Not Support PE type")
 
@@ -78,13 +79,13 @@ class MldVae(nn.Module):
             normalize_before,
         )
         encoder_norm = nn.LayerNorm(self.latent_dim)
-        self.encoder = SkipTransformerEncoder(encoder_layer, num_layers,
-                                              encoder_norm)
+        self.encoder = SkipTransformerEncoder(encoder_layer, num_layers, encoder_norm)
 
         if self.arch == "all_encoder":
             decoder_norm = nn.LayerNorm(self.latent_dim)
-            self.decoder = SkipTransformerEncoder(encoder_layer, num_layers,
-                                                  decoder_norm)
+            self.decoder = SkipTransformerEncoder(
+                encoder_layer, num_layers, decoder_norm
+            )
         elif self.arch == "encoder_decoder":
             decoder_layer = TransformerDecoderLayer(
                 self.latent_dim,
@@ -95,18 +96,21 @@ class MldVae(nn.Module):
                 normalize_before,
             )
             decoder_norm = nn.LayerNorm(self.latent_dim)
-            self.decoder = SkipTransformerDecoder(decoder_layer, num_layers,
-                                                  decoder_norm)
+            self.decoder = SkipTransformerDecoder(
+                decoder_layer, num_layers, decoder_norm
+            )
         else:
             raise ValueError("Not support architecture!")
 
         if self.mlp_dist:
             self.global_motion_token = nn.Parameter(
-                torch.randn(self.latent_size, self.latent_dim))
+                torch.randn(self.latent_size, self.latent_dim)
+            )
             self.dist_layer = nn.Linear(self.latent_dim, 2 * self.latent_dim)
         else:
             self.global_motion_token = nn.Parameter(
-                torch.randn(self.latent_size * 2, self.latent_dim))
+                torch.randn(self.latent_size * 2, self.latent_dim)
+            )
 
         self.skel_embedding = nn.Linear(input_feats, self.latent_dim)
         self.final_layer = nn.Linear(self.latent_dim, output_feats)
@@ -122,9 +126,7 @@ class MldVae(nn.Module):
         return feats_rst, z, dist
 
     def encode(
-            self,
-            features: Tensor,
-            lengths: Optional[List[int]] = None
+        self, features: Tensor, lengths: Optional[List[int]] = None
     ) -> Union[Tensor, Distribution]:
         if lengths is None:
             lengths = [len(feature) for feature in features]
@@ -146,9 +148,7 @@ class MldVae(nn.Module):
         dist = torch.tile(self.global_motion_token[:, None, :], (1, bs, 1))
 
         # create a bigger mask, to allow attend to emb
-        dist_masks = torch.ones((bs, dist.shape[0]),
-                                dtype=bool,
-                                device=x.device)
+        dist_masks = torch.ones((bs, dist.shape[0]), dtype=bool, device=x.device)
         aug_mask = torch.cat((dist_masks, mask), 1)
 
         # adding the embedding token for all sequences
@@ -156,12 +156,10 @@ class MldVae(nn.Module):
 
         if self.pe_type == "actor":
             xseq = self.query_pos_encoder(xseq)
-            dist = self.encoder(xseq,
-                                src_key_padding_mask=~aug_mask)[:dist.shape[0]]
+            dist = self.encoder(xseq, src_key_padding_mask=~aug_mask)[: dist.shape[0]]
         elif self.pe_type == "mld":
             xseq = self.query_pos_encoder(xseq)
-            dist = self.encoder(xseq,
-                                src_key_padding_mask=~aug_mask)[:dist.shape[0]]
+            dist = self.encoder(xseq, src_key_padding_mask=~aug_mask)[: dist.shape[0]]
             # query_pos = self.query_pos_encoder(xseq)
             # dist = self.encoder(xseq, pos=query_pos, src_key_padding_mask=~aug_mask)[
             #     : dist.shape[0]
@@ -171,11 +169,11 @@ class MldVae(nn.Module):
         # self.latent_dim => 2*self.latent_dim
         if self.mlp_dist:
             tokens_dist = self.dist_layer(dist)
-            mu = tokens_dist[:, :, :self.latent_dim]
-            logvar = tokens_dist[:, :, self.latent_dim:]
+            mu = tokens_dist[:, :, : self.latent_dim]
+            logvar = tokens_dist[:, :, self.latent_dim :]
         else:
-            mu = dist[0:self.latent_size, ...]
-            logvar = dist[self.latent_size:, ...]
+            mu = dist[0 : self.latent_size, ...]
+            logvar = dist[self.latent_size :, ...]
 
         # resampling
         std = logvar.exp().pow(0.5)
@@ -196,19 +194,15 @@ class MldVae(nn.Module):
         # with the latent vector for memory
         if self.arch == "all_encoder":
             xseq = torch.cat((z, queries), axis=0)
-            z_mask = torch.ones((bs, self.latent_size),
-                                dtype=bool,
-                                device=z.device)
+            z_mask = torch.ones((bs, self.latent_size), dtype=bool, device=z.device)
             augmask = torch.cat((z_mask, mask), axis=1)
 
             if self.pe_type == "actor":
                 xseq = self.query_pos_decoder(xseq)
-                output = self.decoder(
-                    xseq, src_key_padding_mask=~augmask)[z.shape[0]:]
+                output = self.decoder(xseq, src_key_padding_mask=~augmask)[z.shape[0] :]
             elif self.pe_type == "mld":
                 xseq = self.query_pos_decoder(xseq)
-                output = self.decoder(
-                    xseq, src_key_padding_mask=~augmask)[z.shape[0]:]
+                output = self.decoder(xseq, src_key_padding_mask=~augmask)[z.shape[0] :]
                 # query_pos = self.query_pos_decoder(xseq)
                 # output = self.decoder(
                 #     xseq, pos=query_pos, src_key_padding_mask=~augmask
@@ -217,9 +211,9 @@ class MldVae(nn.Module):
         elif self.arch == "encoder_decoder":
             if self.pe_type == "actor":
                 queries = self.query_pos_decoder(queries)
-                output = self.decoder(tgt=queries,
-                                      memory=z,
-                                      tgt_key_padding_mask=~mask).squeeze(0)
+                output = self.decoder(
+                    tgt=queries, memory=z, tgt_key_padding_mask=~mask
+                ).squeeze(0)
             elif self.pe_type == "mld":
                 queries = self.query_pos_decoder(queries)
                 # mem_pos = self.mem_pos_decoder(z)

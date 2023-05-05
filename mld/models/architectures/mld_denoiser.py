@@ -1,42 +1,43 @@
 import torch
 import torch.nn as nn
-from torch import  nn
-from mld.models.architectures.tools.embeddings import (TimestepEmbedding,
-                                                       Timesteps)
+from torch import nn
+from mld.models.architectures.tools.embeddings import TimestepEmbedding, Timesteps
 from mld.models.operator import PositionalEncoding
-from mld.models.operator.cross_attention import (SkipTransformerEncoder,
-                                                 TransformerDecoder,
-                                                 TransformerDecoderLayer,
-                                                 TransformerEncoder,
-                                                 TransformerEncoderLayer)
+from mld.models.operator.cross_attention import (
+    SkipTransformerEncoder,
+    TransformerDecoder,
+    TransformerDecoderLayer,
+    TransformerEncoder,
+    TransformerEncoderLayer,
+)
 from mld.models.operator.position_encoding import build_position_encoding
 from mld.utils.temos_utils import lengths_to_mask
 
 
 class MldDenoiser(nn.Module):
-
-    def __init__(self,
-                 ablation,
-                 nfeats: int = 263,
-                 condition: str = "text",
-                 latent_dim: list = [1, 256],
-                 ff_size: int = 1024,
-                 num_layers: int = 6,
-                 num_heads: int = 4,
-                 dropout: float = 0.1,
-                 normalize_before: bool = False,
-                 activation: str = "gelu",
-                 flip_sin_to_cos: bool = True,
-                 return_intermediate_dec: bool = False,
-                 position_embedding: str = "learned",
-                 arch: str = "trans_enc",
-                 freq_shift: int = 0,
-                 guidance_scale: float = 7.5,
-                 guidance_uncondp: float = 0.1,
-                 text_encoded_dim: int = 768,
-                 nclasses: int = 10,
-                 **kwargs) -> None:
-
+    def __init__(
+        self,
+        ablation,
+        nfeats: int = 263,
+        condition: str = "text",
+        latent_dim: list = [1, 256],
+        ff_size: int = 1024,
+        num_layers: int = 6,
+        num_heads: int = 4,
+        dropout: float = 0.1,
+        normalize_before: bool = False,
+        activation: str = "gelu",
+        flip_sin_to_cos: bool = True,
+        return_intermediate_dec: bool = False,
+        position_embedding: str = "learned",
+        arch: str = "trans_enc",
+        freq_shift: int = 0,
+        guidance_scale: float = 7.5,
+        guidance_uncondp: float = 0.1,
+        text_encoded_dim: int = 768,
+        nclasses: int = 10,
+        **kwargs,
+    ) -> None:
         super().__init__()
 
         self.latent_dim = latent_dim[-1]
@@ -57,24 +58,23 @@ class MldDenoiser(nn.Module):
         if self.condition in ["text", "text_uncond"]:
             # text condition
             # project time from text_encoded_dim to latent_dim
-            self.time_proj = Timesteps(text_encoded_dim, flip_sin_to_cos,
-                                       freq_shift)
-            self.time_embedding = TimestepEmbedding(text_encoded_dim,
-                                                    self.latent_dim)
+            self.time_proj = Timesteps(text_encoded_dim, flip_sin_to_cos, freq_shift)
+            self.time_embedding = TimestepEmbedding(text_encoded_dim, self.latent_dim)
             # project time+text to latent_dim
             if text_encoded_dim != self.latent_dim:
                 # todo 10.24 debug why relu
                 self.emb_proj = nn.Sequential(
-                    nn.ReLU(), nn.Linear(text_encoded_dim, self.latent_dim))
-        elif self.condition in ['action']:
-            self.time_proj = Timesteps(self.latent_dim, flip_sin_to_cos,
-                                       freq_shift)
-            self.time_embedding = TimestepEmbedding(self.latent_dim,
-                                                    self.latent_dim)
-            self.emb_proj = EmbedAction(nclasses,
-                                        self.latent_dim,
-                                        guidance_scale=guidance_scale,
-                                        guidance_uncodp=guidance_uncondp)
+                    nn.ReLU(), nn.Linear(text_encoded_dim, self.latent_dim)
+                )
+        elif self.condition in ["action"]:
+            self.time_proj = Timesteps(self.latent_dim, flip_sin_to_cos, freq_shift)
+            self.time_embedding = TimestepEmbedding(self.latent_dim, self.latent_dim)
+            self.emb_proj = EmbedAction(
+                nclasses,
+                self.latent_dim,
+                guidance_scale=guidance_scale,
+                guidance_uncodp=guidance_uncondp,
+            )
         else:
             raise TypeError(f"condition type {self.condition} not supported")
 
@@ -83,9 +83,11 @@ class MldDenoiser(nn.Module):
             self.mem_pos = PositionalEncoding(self.latent_dim, dropout)
         elif self.pe_type == "mld":
             self.query_pos = build_position_encoding(
-                self.latent_dim, position_embedding=position_embedding)
+                self.latent_dim, position_embedding=position_embedding
+            )
             self.mem_pos = build_position_encoding(
-                self.latent_dim, position_embedding=position_embedding)
+                self.latent_dim, position_embedding=position_embedding
+            )
         else:
             raise ValueError("Not Support PE type")
 
@@ -101,8 +103,9 @@ class MldDenoiser(nn.Module):
                     normalize_before,
                 )
                 encoder_norm = nn.LayerNorm(self.latent_dim)
-                self.encoder = SkipTransformerEncoder(encoder_layer,
-                                                      num_layers, encoder_norm)
+                self.encoder = SkipTransformerEncoder(
+                    encoder_layer, num_layers, encoder_norm
+                )
             else:
                 # use torch transformer
                 encoder_layer = nn.TransformerEncoderLayer(
@@ -110,9 +113,11 @@ class MldDenoiser(nn.Module):
                     nhead=num_heads,
                     dim_feedforward=ff_size,
                     dropout=dropout,
-                    activation=activation)
-                self.encoder = nn.TransformerEncoder(encoder_layer,
-                                                     num_layers=num_layers)
+                    activation=activation,
+                )
+                self.encoder = nn.TransformerEncoder(
+                    encoder_layer, num_layers=num_layers
+                )
         elif self.arch == "trans_dec":
             decoder_layer = TransformerDecoderLayer(
                 self.latent_dim,
@@ -132,12 +137,7 @@ class MldDenoiser(nn.Module):
         else:
             raise ValueError(f"Not supported architechure{self.arch}!")
 
-    def forward(self,
-                sample,
-                timestep,
-                encoder_hidden_states,
-                lengths=None,
-                **kwargs):
+    def forward(self, sample, timestep, encoder_hidden_states, lengths=None, **kwargs):
         # 0.  dimension matching
         # sample [latent_dim[0], batch_size, latent_dim] <= [batch_size, latent_dim[0], latent_dim[1]]
         sample = sample.permute(1, 0, 2)
@@ -169,7 +169,7 @@ class MldDenoiser(nn.Module):
                 emb_latent = time_emb + text_emb_latent
             else:
                 emb_latent = torch.cat((time_emb, text_emb_latent), 0)
-        elif self.condition in ['action']:
+        elif self.condition in ["action"]:
             action_emb = self.emb_proj(encoder_hidden_states)
             if self.abl_plus:
                 emb_latent = action_emb + time_emb
@@ -197,13 +197,13 @@ class MldDenoiser(nn.Module):
             tokens = self.encoder(xseq)
 
             if self.diffusion_only:
-                sample = tokens[emb_latent.shape[0]:]
+                sample = tokens[emb_latent.shape[0] :]
                 sample = self.pose_proj(sample)
 
                 # zero for padded area
                 sample[~mask.T] = 0
             else:
-                sample = tokens[:sample.shape[0]]
+                sample = tokens[: sample.shape[0]]
 
         elif self.arch == "trans_dec":
             if self.diffusion_only:
@@ -225,22 +225,22 @@ class MldDenoiser(nn.Module):
         # 5. [batch_size, latent_dim[0], latent_dim[1]] <= [latent_dim[0], batch_size, latent_dim[1]]
         sample = sample.permute(1, 0, 2)
 
-        return (sample, )
+        return (sample,)
 
 
 class EmbedAction(nn.Module):
-
-    def __init__(self,
-                 num_actions,
-                 latent_dim,
-                 guidance_scale=7.5,
-                 guidance_uncodp=0.1,
-                 force_mask=False):
+    def __init__(
+        self,
+        num_actions,
+        latent_dim,
+        guidance_scale=7.5,
+        guidance_uncodp=0.1,
+        force_mask=False,
+    ):
         super().__init__()
         self.nclasses = num_actions
         self.guidance_scale = guidance_scale
-        self.action_embedding = nn.Parameter(
-            torch.randn(num_actions, latent_dim))
+        self.action_embedding = nn.Parameter(torch.randn(num_actions, latent_dim))
 
         self.guidance_uncodp = guidance_uncodp
         self.force_mask = force_mask
@@ -264,12 +264,13 @@ class EmbedAction(nn.Module):
         # classifer guidence
         if self.force_mask or force:
             return torch.zeros_like(output)
-        elif self.training and self.guidance_uncodp > 0.:
+        elif self.training and self.guidance_uncodp > 0.0:
             mask = torch.bernoulli(
-                torch.ones(bs, device=output.device) *
-                self.guidance_uncodp).view(
-                    bs, 1)  # 1-> use null_cond, 0-> use real cond
-            return output * (1. - mask)
+                torch.ones(bs, device=output.device) * self.guidance_uncodp
+            ).view(
+                bs, 1
+            )  # 1-> use null_cond, 0-> use real cond
+            return output * (1.0 - mask)
         else:
             return output
 

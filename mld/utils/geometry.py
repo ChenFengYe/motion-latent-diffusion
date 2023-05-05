@@ -36,21 +36,21 @@ def matrix_of_angles(cos, sin, inv=False, dim=2):
 def matrot2axisangle(matrots):
     # This function is borrowed from https://github.com/davrempe/humor/utils/transforms.py
     # axisang N x 3
-    '''
+    """
     :param matrots: N*num_joints*9
     :return: N*num_joints*3
-    '''
+    """
     import cv2
+
     batch_size = matrots.shape[0]
     matrots = matrots.reshape([batch_size, -1, 9])
     out_axisangle = []
     for mIdx in range(matrots.shape[0]):
         cur_axisangle = []
         for jIdx in range(matrots.shape[1]):
-            a = cv2.Rodrigues(matrots[mIdx,
-                                      jIdx:jIdx + 1, :].reshape(3,
-                                                                3))[0].reshape(
-                                                                    (1, 3))
+            a = cv2.Rodrigues(matrots[mIdx, jIdx : jIdx + 1, :].reshape(3, 3))[
+                0
+            ].reshape((1, 3))
             cur_axisangle.append(a)
 
         out_axisangle.append(np.array(cur_axisangle).reshape([1, -1, 3]))
@@ -60,19 +60,19 @@ def matrot2axisangle(matrots):
 def axisangle2matrots(axisangle):
     # This function is borrowed from https://github.com/davrempe/humor/utils/transforms.py
     # axisang N x 3
-    '''
+    """
     :param axisangle: N*num_joints*3
     :return: N*num_joints*9
-    '''
+    """
     import cv2
+
     batch_size = axisangle.shape[0]
     axisangle = axisangle.reshape([batch_size, -1, 3])
     out_matrot = []
     for mIdx in range(axisangle.shape[0]):
         cur_axisangle = []
         for jIdx in range(axisangle.shape[1]):
-            a = cv2.Rodrigues(axisangle[mIdx, jIdx:jIdx + 1, :].reshape(1,
-                                                                        3))[0]
+            a = cv2.Rodrigues(axisangle[mIdx, jIdx : jIdx + 1, :].reshape(1, 3))[0]
             cur_axisangle.append(a)
 
         out_matrot.append(np.array(cur_axisangle).reshape([1, -1, 9]))
@@ -107,9 +107,7 @@ def quat2mat(quat):
     """
     norm_quat = quat
     norm_quat = norm_quat / norm_quat.norm(p=2, dim=1, keepdim=True)
-    w, x, y, z = norm_quat[:, 0], norm_quat[:, 1], norm_quat[:,
-                                                             2], norm_quat[:,
-                                                                           3]
+    w, x, y, z = norm_quat[:, 0], norm_quat[:, 1], norm_quat[:, 2], norm_quat[:, 3]
 
     batch_size = quat.size(0)
 
@@ -117,12 +115,20 @@ def quat2mat(quat):
     wx, wy, wz = w * x, w * y, w * z
     xy, xz, yz = x * y, x * z, y * z
 
-    rotMat = torch.stack([
-        w2 + x2 - y2 - z2, 2 * xy - 2 * wz, 2 * wy + 2 * xz, 2 * wz + 2 * xy,
-        w2 - x2 + y2 - z2, 2 * yz - 2 * wx, 2 * xz - 2 * wy, 2 * wx + 2 * yz,
-        w2 - x2 - y2 + z2
-    ],
-                         dim=1).view(batch_size, 3, 3)
+    rotMat = torch.stack(
+        [
+            w2 + x2 - y2 - z2,
+            2 * xy - 2 * wz,
+            2 * wy + 2 * xz,
+            2 * wz + 2 * xy,
+            w2 - x2 + y2 - z2,
+            2 * yz - 2 * wx,
+            2 * xz - 2 * wy,
+            2 * wx + 2 * yz,
+            w2 - x2 - y2 + z2,
+        ],
+        dim=1,
+    ).view(batch_size, 3, 3)
     return rotMat
 
 
@@ -148,10 +154,11 @@ def rotation_matrix_to_angle_axis(rotation_matrix):
     """
     if rotation_matrix.shape[1:] == (3, 3):
         rot_mat = rotation_matrix.reshape(-1, 3, 3)
-        hom = torch.tensor([0, 0, 1],
-                           dtype=torch.float32,
-                           device=rotation_matrix.device).reshape(
-                               1, 3, 1).expand(rot_mat.shape[0], -1, -1)
+        hom = (
+            torch.tensor([0, 0, 1], dtype=torch.float32, device=rotation_matrix.device)
+            .reshape(1, 3, 1)
+            .expand(rot_mat.shape[0], -1, -1)
+        )
         rotation_matrix = torch.cat([rot_mat, hom], dim=-1)
 
     quaternion = rotation_matrix_to_quaternion(rotation_matrix)
@@ -183,13 +190,14 @@ def quaternion_to_angle_axis(quaternion: torch.Tensor) -> torch.Tensor:
         >>> angle_axis = tgm.quaternion_to_angle_axis(quaternion)  # Nx3
     """
     if not torch.is_tensor(quaternion):
-        raise TypeError("Input type is not a torch.Tensor. Got {}".format(
-            type(quaternion)))
+        raise TypeError(
+            "Input type is not a torch.Tensor. Got {}".format(type(quaternion))
+        )
 
     if not quaternion.shape[-1] == 4:
         raise ValueError(
-            "Input must be a tensor of shape Nx4 or 4. Got {}".format(
-                quaternion.shape))
+            "Input must be a tensor of shape Nx4 or 4. Got {}".format(quaternion.shape)
+        )
     # unpack input and compute conversion
     q1: torch.Tensor = quaternion[..., 1]
     q2: torch.Tensor = quaternion[..., 2]
@@ -199,8 +207,10 @@ def quaternion_to_angle_axis(quaternion: torch.Tensor) -> torch.Tensor:
     sin_theta: torch.Tensor = torch.sqrt(sin_squared_theta)
     cos_theta: torch.Tensor = quaternion[..., 0]
     two_theta: torch.Tensor = 2.0 * torch.where(
-        cos_theta < 0.0, torch.atan2(-sin_theta, -cos_theta),
-        torch.atan2(sin_theta, cos_theta))
+        cos_theta < 0.0,
+        torch.atan2(-sin_theta, -cos_theta),
+        torch.atan2(sin_theta, cos_theta),
+    )
 
     k_pos: torch.Tensor = two_theta / sin_theta
     k_neg: torch.Tensor = 2.0 * torch.ones_like(sin_theta)
@@ -237,17 +247,22 @@ def rotation_matrix_to_quaternion(rotation_matrix, eps=1e-6):
         >>> output = tgm.rotation_matrix_to_quaternion(input)  # Nx4
     """
     if not torch.is_tensor(rotation_matrix):
-        raise TypeError("Input type is not a torch.Tensor. Got {}".format(
-            type(rotation_matrix)))
+        raise TypeError(
+            "Input type is not a torch.Tensor. Got {}".format(type(rotation_matrix))
+        )
 
     if len(rotation_matrix.shape) > 3:
         raise ValueError(
             "Input size must be a three dimensional tensor. Got {}".format(
-                rotation_matrix.shape))
+                rotation_matrix.shape
+            )
+        )
     if not rotation_matrix.shape[-2:] == (3, 4):
         raise ValueError(
             "Input size must be a N x 3 x 4  tensor. Got {}".format(
-                rotation_matrix.shape))
+                rotation_matrix.shape
+            )
+        )
 
     rmat_t = torch.transpose(rotation_matrix, 1, 2)
 
@@ -257,31 +272,51 @@ def rotation_matrix_to_quaternion(rotation_matrix, eps=1e-6):
     mask_d0_nd1 = rmat_t[:, 0, 0] < -rmat_t[:, 1, 1]
 
     t0 = 1 + rmat_t[:, 0, 0] - rmat_t[:, 1, 1] - rmat_t[:, 2, 2]
-    q0 = torch.stack([
-        rmat_t[:, 1, 2] - rmat_t[:, 2, 1], t0,
-        rmat_t[:, 0, 1] + rmat_t[:, 1, 0], rmat_t[:, 2, 0] + rmat_t[:, 0, 2]
-    ], -1)
+    q0 = torch.stack(
+        [
+            rmat_t[:, 1, 2] - rmat_t[:, 2, 1],
+            t0,
+            rmat_t[:, 0, 1] + rmat_t[:, 1, 0],
+            rmat_t[:, 2, 0] + rmat_t[:, 0, 2],
+        ],
+        -1,
+    )
     t0_rep = t0.repeat(4, 1).t()
 
     t1 = 1 - rmat_t[:, 0, 0] + rmat_t[:, 1, 1] - rmat_t[:, 2, 2]
-    q1 = torch.stack([
-        rmat_t[:, 2, 0] - rmat_t[:, 0, 2], rmat_t[:, 0, 1] + rmat_t[:, 1, 0],
-        t1, rmat_t[:, 1, 2] + rmat_t[:, 2, 1]
-    ], -1)
+    q1 = torch.stack(
+        [
+            rmat_t[:, 2, 0] - rmat_t[:, 0, 2],
+            rmat_t[:, 0, 1] + rmat_t[:, 1, 0],
+            t1,
+            rmat_t[:, 1, 2] + rmat_t[:, 2, 1],
+        ],
+        -1,
+    )
     t1_rep = t1.repeat(4, 1).t()
 
     t2 = 1 - rmat_t[:, 0, 0] - rmat_t[:, 1, 1] + rmat_t[:, 2, 2]
-    q2 = torch.stack([
-        rmat_t[:, 0, 1] - rmat_t[:, 1, 0], rmat_t[:, 2, 0] + rmat_t[:, 0, 2],
-        rmat_t[:, 1, 2] + rmat_t[:, 2, 1], t2
-    ], -1)
+    q2 = torch.stack(
+        [
+            rmat_t[:, 0, 1] - rmat_t[:, 1, 0],
+            rmat_t[:, 2, 0] + rmat_t[:, 0, 2],
+            rmat_t[:, 1, 2] + rmat_t[:, 2, 1],
+            t2,
+        ],
+        -1,
+    )
     t2_rep = t2.repeat(4, 1).t()
 
     t3 = 1 + rmat_t[:, 0, 0] + rmat_t[:, 1, 1] + rmat_t[:, 2, 2]
-    q3 = torch.stack([
-        t3, rmat_t[:, 1, 2] - rmat_t[:, 2, 1],
-        rmat_t[:, 2, 0] - rmat_t[:, 0, 2], rmat_t[:, 0, 1] - rmat_t[:, 1, 0]
-    ], -1)
+    q3 = torch.stack(
+        [
+            t3,
+            rmat_t[:, 1, 2] - rmat_t[:, 2, 1],
+            rmat_t[:, 2, 0] - rmat_t[:, 0, 2],
+            rmat_t[:, 0, 1] - rmat_t[:, 1, 0],
+        ],
+        -1,
+    )
     t3_rep = t3.repeat(4, 1).t()
 
     mask_c0 = mask_d2 * mask_d0_d1
@@ -294,17 +329,19 @@ def rotation_matrix_to_quaternion(rotation_matrix, eps=1e-6):
     mask_c3 = mask_c3.view(-1, 1).type_as(q3)
 
     q = q0 * mask_c0 + q1 * mask_c1 + q2 * mask_c2 + q3 * mask_c3
-    q /= torch.sqrt(t0_rep * mask_c0 + t1_rep * mask_c1 +  # noqa
-                    t2_rep * mask_c2 + t3_rep * mask_c3)  # noqa
+    q /= torch.sqrt(
+        t0_rep * mask_c0
+        + t1_rep * mask_c1
+        + t2_rep * mask_c2  # noqa
+        + t3_rep * mask_c3
+    )  # noqa
     q *= 0.5
     return q
 
 
-def estimate_translation_np(S,
-                            joints_2d,
-                            joints_conf,
-                            focal_length=5000.,
-                            img_size=224.):
+def estimate_translation_np(
+    S, joints_2d, joints_conf, focal_length=5000.0, img_size=224.0
+):
     """
     This function is borrowed from https://github.com/nkolot/SPIN/utils/geometry.py
 
@@ -320,7 +357,7 @@ def estimate_translation_np(S,
     # focal length
     f = np.array([focal_length, focal_length])
     # optical center
-    center = np.array([img_size / 2., img_size / 2.])
+    center = np.array([img_size / 2.0, img_size / 2.0])
 
     # transformations
     Z = np.reshape(np.tile(S[:, 2], (2, 1)).T, -1)
@@ -330,11 +367,13 @@ def estimate_translation_np(S,
     weight2 = np.reshape(np.tile(np.sqrt(joints_conf), (2, 1)).T, -1)
 
     # least squares
-    Q = np.array([
-        F * np.tile(np.array([1, 0]), num_joints),
-        F * np.tile(np.array([0, 1]), num_joints),
-        O - np.reshape(joints_2d, -1)
-    ]).T
+    Q = np.array(
+        [
+            F * np.tile(np.array([1, 0]), num_joints),
+            F * np.tile(np.array([0, 1]), num_joints),
+            O - np.reshape(joints_2d, -1),
+        ]
+    ).T
     c = (np.reshape(joints_2d, -1) - O) * Z - F * XY
 
     # weighted least squares
@@ -352,7 +391,7 @@ def estimate_translation_np(S,
     return trans
 
 
-def estimate_translation(S, joints_2d, focal_length=5000., img_size=224.):
+def estimate_translation(S, joints_2d, focal_length=5000.0, img_size=224.0):
     """
     This function is borrowed from https://github.com/nkolot/SPIN/utils/geometry.py
 
@@ -376,11 +415,9 @@ def estimate_translation(S, joints_2d, focal_length=5000., img_size=224.):
         S_i = S[i]
         joints_i = joints_2d[i]
         conf_i = joints_conf[i]
-        trans[i] = estimate_translation_np(S_i,
-                                           joints_i,
-                                           conf_i,
-                                           focal_length=focal_length,
-                                           img_size=img_size)
+        trans[i] = estimate_translation_np(
+            S_i, joints_i, conf_i, focal_length=focal_length, img_size=img_size
+        )
     return torch.from_numpy(trans).to(device)
 
 
@@ -396,7 +433,7 @@ def rot6d_to_rotmat_spin(x):
     a1 = x[:, :, 0]
     a2 = x[:, :, 1]
     b1 = F.normalize(a1)
-    b2 = F.normalize(a2 - torch.einsum('bi,bi->b', b1, a2).unsqueeze(-1) * b1)
+    b2 = F.normalize(a2 - torch.einsum("bi,bi->b", b1, a2).unsqueeze(-1) * b1)
 
     # inp = a2 - torch.einsum('bi,bi->b', b1, a2).unsqueeze(-1) * b1
     # denom = inp.pow(2).sum(dim=1).sqrt().unsqueeze(-1) + 1e-8

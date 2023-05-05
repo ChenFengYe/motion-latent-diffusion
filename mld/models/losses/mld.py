@@ -3,8 +3,7 @@ import torch
 import torch.nn as nn
 from torchmetrics import Metric
 
-from mld.data.humanml.scripts.motion_process import (qrot,
-                                                     recover_root_rot_pos)
+from mld.data.humanml.scripts.motion_process import qrot, recover_root_rot_pos
 
 
 class MLDLosses(Metric):
@@ -26,7 +25,7 @@ class MLDLosses(Metric):
         losses = []
 
         # diffusion loss
-        if self.stage in ['diffusion', 'vae_diffusion']:
+        if self.stage in ["diffusion", "vae_diffusion"]:
             # instance noise loss
             losses.append("inst_loss")
             losses.append("x_loss")
@@ -34,7 +33,7 @@ class MLDLosses(Metric):
                 # prior noise loss
                 losses.append("prior_loss")
 
-        if self.stage in ['vae', 'vae_diffusion']:
+        if self.stage in ["vae", "vae_diffusion"]:
             # reconstruction loss
             losses.append("recons_feature")
             losses.append("recons_verts")
@@ -47,15 +46,13 @@ class MLDLosses(Metric):
             # KL loss
             losses.append("kl_motion")
 
-        if self.stage not in ['vae', 'diffusion', 'vae_diffusion']:
+        if self.stage not in ["vae", "diffusion", "vae_diffusion"]:
             raise ValueError(f"Stage {self.stage} not supported")
 
         losses.append("total")
 
         for loss in losses:
-            self.add_state(loss,
-                           default=torch.tensor(0.0),
-                           dist_reduce_fx="sum")
+            self.add_state(loss, default=torch.tensor(0.0), dist_reduce_fx="sum")
             # self.register_buffer(loss, torch.tensor(0.0))
         self.add_state("count", torch.tensor(0), dist_reduce_fx="sum")
         self.losses = losses
@@ -63,34 +60,31 @@ class MLDLosses(Metric):
         self._losses_func = {}
         self._params = {}
         for loss in losses:
-            if loss.split('_')[0] == 'inst':
-                self._losses_func[loss] = nn.MSELoss(reduction='mean')
+            if loss.split("_")[0] == "inst":
+                self._losses_func[loss] = nn.MSELoss(reduction="mean")
                 self._params[loss] = 1
-            elif loss.split('_')[0] == 'x':
-                self._losses_func[loss] = nn.MSELoss(reduction='mean')
+            elif loss.split("_")[0] == "x":
+                self._losses_func[loss] = nn.MSELoss(reduction="mean")
                 self._params[loss] = 1
-            elif loss.split('_')[0] == 'prior':
-                self._losses_func[loss] = nn.MSELoss(reduction='mean')
+            elif loss.split("_")[0] == "prior":
+                self._losses_func[loss] = nn.MSELoss(reduction="mean")
                 self._params[loss] = cfg.LOSS.LAMBDA_PRIOR
-            if loss.split('_')[0] == 'kl':
+            if loss.split("_")[0] == "kl":
                 if cfg.LOSS.LAMBDA_KL != 0.0:
                     self._losses_func[loss] = KLLoss()
                     self._params[loss] = cfg.LOSS.LAMBDA_KL
-            elif loss.split('_')[0] == 'recons':
-                self._losses_func[loss] = torch.nn.SmoothL1Loss(
-                    reduction='mean')
+            elif loss.split("_")[0] == "recons":
+                self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                 self._params[loss] = cfg.LOSS.LAMBDA_REC
-            elif loss.split('_')[0] == 'gen':
-                self._losses_func[loss] = torch.nn.SmoothL1Loss(
-                    reduction='mean')
+            elif loss.split("_")[0] == "gen":
+                self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                 self._params[loss] = cfg.LOSS.LAMBDA_GEN
-            elif loss.split('_')[0] == 'latent':
-                self._losses_func[loss] = torch.nn.SmoothL1Loss(
-                    reduction='mean')
+            elif loss.split("_")[0] == "latent":
+                self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                 self._params[loss] = cfg.LOSS.LAMBDA_LATENT
             else:
                 ValueError("This loss is not recognized.")
-            if loss.split('_')[-1] == 'joints':
+            if loss.split("_")[-1] == "joints":
                 self._params[loss] = cfg.LOSS.LAMBDA_JOINT
 
     def update(self, rs_set):
@@ -98,34 +92,41 @@ class MLDLosses(Metric):
         # Compute the losses
         # Compute instance loss
         if self.stage in ["vae", "vae_diffusion"]:
-            total += self._update_loss("recons_feature", rs_set['m_rst'],
-                                       rs_set['m_ref'])
-            total += self._update_loss("recons_joints", rs_set['joints_rst'],
-                                       rs_set['joints_ref'])
-            total += self._update_loss("kl_motion", rs_set['dist_m'], rs_set['dist_ref'])
+            total += self._update_loss(
+                "recons_feature", rs_set["m_rst"], rs_set["m_ref"]
+            )
+            total += self._update_loss(
+                "recons_joints", rs_set["joints_rst"], rs_set["joints_ref"]
+            )
+            total += self._update_loss(
+                "kl_motion", rs_set["dist_m"], rs_set["dist_ref"]
+            )
 
         if self.stage in ["diffusion", "vae_diffusion"]:
             # predict noise
             if self.predict_epsilon:
-                total += self._update_loss("inst_loss", rs_set['noise_pred'],
-                                           rs_set['noise'])
+                total += self._update_loss(
+                    "inst_loss", rs_set["noise_pred"], rs_set["noise"]
+                )
             # predict x
             else:
-                total += self._update_loss("x_loss", rs_set['pred'],
-                                           rs_set['latent'])
+                total += self._update_loss("x_loss", rs_set["pred"], rs_set["latent"])
 
             if self.cfg.LOSS.LAMBDA_PRIOR != 0.0:
                 # loss - prior loss
-                total += self._update_loss("prior_loss", rs_set['noise_prior'],
-                                           rs_set['dist_m1'])
+                total += self._update_loss(
+                    "prior_loss", rs_set["noise_prior"], rs_set["dist_m1"]
+                )
 
         if self.stage in ["vae_diffusion"]:
             # loss
             # noise+text_emb => diff_reverse => latent => decode => motion
-            total += self._update_loss("gen_feature", rs_set['gen_m_rst'],
-                                       rs_set['m_ref'])
-            total += self._update_loss("gen_joints", rs_set['gen_joints_rst'],
-                                       rs_set['joints_ref'])
+            total += self._update_loss(
+                "gen_feature", rs_set["gen_m_rst"], rs_set["m_ref"]
+            )
+            total += self._update_loss(
+                "gen_joints", rs_set["gen_joints_rst"], rs_set["joints_ref"]
+            )
 
         self.total += total.detach()
         self.count += 1
@@ -152,8 +153,8 @@ class MLDLosses(Metric):
             log_name = f"{loss_type}/{name}/{split}"
         return log_name
 
-class KLLoss:
 
+class KLLoss:
     def __init__(self):
         pass
 
@@ -166,7 +167,6 @@ class KLLoss:
 
 
 class KLLossMulti:
-
     def __init__(self):
         self.klloss = KLLoss()
 

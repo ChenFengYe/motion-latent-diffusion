@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torchmetrics import Metric
 
+
 class TmostLosses(Metric):
     """
     Loss
@@ -21,8 +22,9 @@ class TmostLosses(Metric):
     'gen_loss_twist': l_tw,
     'gen_loss_triplet': l_triplet,
     'gen_loss_joint': l_joint,
-           
+
     """
+
     def __init__(self, vae, mode, cfg):
         super().__init__(dist_sync_on_step=cfg.LOSS.DIST_SYNC_ON_STEP)
 
@@ -70,25 +72,24 @@ class TmostLosses(Metric):
         self._losses_func = {}
         self._params = {}
         for loss in losses:
-            if loss !='total':
-                if loss.split('_')[0] == 'kl':
+            if loss != "total":
+                if loss.split("_")[0] == "kl":
                     self._losses_func[loss] = KLLoss()
                     self._params[loss] = cfg.LOSS.LAMBDA_KL
-                elif loss.split('_')[0] == 'recons':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction='mean')
+                elif loss.split("_")[0] == "recons":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_REC
-                elif loss.split('_')[0] == 'cross':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction='mean')
+                elif loss.split("_")[0] == "cross":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_CROSS
-                elif loss.split('_')[0] =='latent':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction='mean')
+                elif loss.split("_")[0] == "latent":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_LATENT
-                elif loss.split('_')[0] =='cycle':
-                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction='mean')
+                elif loss.split("_")[0] == "cycle":
+                    self._losses_func[loss] = torch.nn.SmoothL1Loss(reduction="mean")
                     self._params[loss] = cfg.LOSS.LAMBDA_CYCLE
                 else:
                     ValueError("This loss is not recognized.")
-
 
     def update(self, rs_set, dist_ref):
         total: float = 0.0
@@ -116,12 +117,12 @@ class TmostLosses(Metric):
 
         # loss1 - reconstruction loss
         #       - from one motion-text pair
-        total += self._update_loss("recons_mm2m", rs_set['rs_cm1sm1'], rs_set['m1'])
-        total += self._update_loss("recons_t2m", rs_set['rs_ct1st1'], rs_set['m1'])
+        total += self._update_loss("recons_mm2m", rs_set["rs_cm1sm1"], rs_set["m1"])
+        total += self._update_loss("recons_t2m", rs_set["rs_ct1st1"], rs_set["m1"])
 
         # loss - cross reconstruction loss
-        total += self._update_loss("cross_mt2m", rs_set['rs_cm1st1'], rs_set['m1'])
-        total += self._update_loss("cross_tm2m", rs_set['rs_ct1sm1'], rs_set['m1'])
+        total += self._update_loss("cross_mt2m", rs_set["rs_cm1st1"], rs_set["m1"])
+        total += self._update_loss("cross_tm2m", rs_set["rs_ct1sm1"], rs_set["m1"])
 
         # total += self._update_loss("recons_tm2m", rs_set['rs_c1st1'], rs_set['m1'])
         # total += self._update_loss("recons_m2m", rs_set['rs_cm2sm2'], m2)
@@ -131,8 +132,12 @@ class TmostLosses(Metric):
         # loss2 - cycle cotent/style consistency loss
         #       - from cross motion-motion pair
         if self.ablation_cycle:
-            total += self._update_loss("cycle_cmsm2mContent", rs_set['cyc_rs_cm1sm1'], rs_set['m1'])
-            total += self._update_loss("cycle_cmsm2mStyle", rs_set['cyc_rs_cm2sm2'], rs_set['m2'])
+            total += self._update_loss(
+                "cycle_cmsm2mContent", rs_set["cyc_rs_cm1sm1"], rs_set["m1"]
+            )
+            total += self._update_loss(
+                "cycle_cmsm2mStyle", rs_set["cyc_rs_cm2sm2"], rs_set["m2"]
+            )
 
         # [to-do] loss for labeled style motions
         # refer to deep-motion-editing datasets
@@ -143,22 +148,22 @@ class TmostLosses(Metric):
         # xxx
 
         # loss3 - text motion latent loss
-        total += self._update_loss("latent_ct2cm", rs_set['lat_ct1'], rs_set['lat_cm1'])
-        total += self._update_loss("latent_st2sm", rs_set['lat_st1'], rs_set['lat_sm1'])
+        total += self._update_loss("latent_ct2cm", rs_set["lat_ct1"], rs_set["lat_cm1"])
+        total += self._update_loss("latent_st2sm", rs_set["lat_st1"], rs_set["lat_sm1"])
 
         # loss4 - content loss!!!
 
         # loss5 - text encoder/decoder loss!!!
 
         # loss - kl loss
-        total += self._update_loss("kl_motion", rs_set['dist_cm1'], dist_ref)
+        total += self._update_loss("kl_motion", rs_set["dist_cm1"], dist_ref)
         # total += self._update_loss("kl_motion", rs_set['dist_sm1'], dist_ref)
 
-        total += self._update_loss("kl_text", rs_set['dist_ct1'], dist_ref)
+        total += self._update_loss("kl_text", rs_set["dist_ct1"], dist_ref)
         # total += self._update_loss("kl_text", rs_set['dist_st1'], dist_ref)
 
-        total += self._update_loss("kl_ct2cm", rs_set['dist_ct1'], rs_set['dist_cm1'])
-        total += self._update_loss("kl_cm2ct", rs_set['dist_cm1'], rs_set['dist_ct1'])
+        total += self._update_loss("kl_ct2cm", rs_set["dist_ct1"], rs_set["dist_cm1"])
+        total += self._update_loss("kl_cm2ct", rs_set["dist_cm1"], rs_set["dist_ct1"])
 
         self.total += total.detach()
         self.count += 1
@@ -167,7 +172,7 @@ class TmostLosses(Metric):
 
     def compute(self, split):
         count = getattr(self, "count")
-        return {loss: getattr(self, loss)/count for loss in self.losses}
+        return {loss: getattr(self, loss) / count for loss in self.losses}
 
     def _update_loss(self, loss: str, outputs, inputs):
         # Update the loss
@@ -203,8 +208,7 @@ class KLLossMulti:
         self.klloss = KLLoss()
 
     def __call__(self, qlist, plist):
-        return sum([self.klloss(q, p)
-                    for q, p in zip(qlist, plist)])
+        return sum([self.klloss(q, p) for q, p in zip(qlist, plist)])
 
     def __repr__(self):
         return "KLLossMulti()"

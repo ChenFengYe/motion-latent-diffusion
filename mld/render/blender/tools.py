@@ -25,12 +25,12 @@ def load_numpy_vertices_into_blender(vertices, faces, name, mat):
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
 
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action="DESELECT")
     obj.select_set(True)
     obj.active_material = mat
     bpy.context.view_layer.objects.active = obj
     bpy.ops.object.shade_smooth()
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action="DESELECT")
     return True
 
 
@@ -38,10 +38,10 @@ def delete_objs(names):
     if not isinstance(names, list):
         names = [names]
     # bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action="DESELECT")
     for obj in bpy.context.scene.objects:
         for name in names:
             if obj.name.startswith(name) or obj.name.endswith(name):
                 obj.select_set(True)
     bpy.ops.object.delete()
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action="DESELECT")

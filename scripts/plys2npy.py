@@ -25,9 +25,10 @@ def main():
         type=str,
         required=True,
         help="output folder",
-    )    
+    )
     params = parser.parse_args()
     plys2npy(params.ply_dir, params.out_dir)
+
 
 def plys2npy(ply_dir, out_dir):
     ply_dir = Path(ply_dir)
@@ -37,20 +38,19 @@ def plys2npy(ply_dir, out_dir):
         if item.endswith(".ply") and not item.endswith("_gt.ply"):
             paths.append(os.path.join(ply_dir, item))
 
-
     meshs = np.zeros((len(paths), 6890, 3))
     for i, path in enumerate(paths):
         mesh = trimesh.load_mesh(path, process=False)
         vs = mesh.vertices
         assert vs.shape == (6890, 3)
-        meshs[i] = vs 
+        meshs[i] = vs
 
     basename = os.path.basename(ply_dir)
     if basename.startswith("SMPLFit_"):
-        basename = basename[len("SMPLFit_"):]
-    file_name = os.path.join(out_dir, basename+ "_mesh.npy")
+        basename = basename[len("SMPLFit_") :]
+    file_name = os.path.join(out_dir, basename + "_mesh.npy")
     np.save(file_name, meshs)
-    
+
 
 if __name__ == "__main__":
     main()
