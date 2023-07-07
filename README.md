@@ -195,6 +195,7 @@ optional parameters:
   
  If your demo results have a severe issue on foot sliding, please take a look to the below. It could happen when ``self.feats2joints`` (use mean and std for de-normalization) is broken. 
  https://github.com/ChenFengYe/motion-latent-diffusion/blob/af507c479d771f62a058b5b6abb51276b36d6c6d/mld/models/modeltype/mld.py#L264
+ https://github.com/ChenFengYe/motion-latent-diffusion/blob/5c264c31fbc7ffc047be1ce003622f1865417e8f/mld/data/get_data.py#L26-L41
  
 </details>
 
