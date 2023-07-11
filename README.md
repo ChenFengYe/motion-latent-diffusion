@@ -258,12 +258,12 @@ python -m scripts.tsne --cfg configs/your_config.yaml
 If you find our code or paper helps, please consider citing:
 
 ```bibtex
-@inproceedings{chen2023mld,
-  title     = {Executing your Commands via Motion Diffusion in Latent Space},
-  author    = {Xin, Chen and Jiang, Biao and Liu, Wen and Huang, Zilong and Fu, Bin and Chen, Tao and Yu, Jingyi and Yu, Gang},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-  month     = {June},
-  year      = {2023},
+@inproceedings{chen2023executing,
+  title={Executing your Commands via Motion Diffusion in Latent Space},
+  author={Chen, Xin and Jiang, Biao and Liu, Wen and Huang, Zilong and Fu, Bin and Chen, Tao and Yu, Gang},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={18000--18010},
+  year={2023}
 }
 ```
 
